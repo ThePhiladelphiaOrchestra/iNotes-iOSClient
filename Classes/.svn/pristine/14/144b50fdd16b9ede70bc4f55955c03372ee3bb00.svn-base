@@ -1,0 +1,227 @@
+//
+//  GlossaryViewController.m
+//  Untitled
+//
+//  Created by Administrator on 2/2/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import "GlossaryViewController.h"
+
+
+@implementation GlossaryViewController
+
+@synthesize dataSource1;
+
+const CGFloat kDefaultMenuWidth = 175.0;
+const CGFloat kDefaultBarWidth = 10.0;
+
+- (id) init
+{
+	self = [super init];
+	if (self != nil) {
+		CGRect appFrame = [[UIScreen mainScreen] applicationFrame];
+		
+		UIView *view = [[UIView alloc] initWithFrame:appFrame];
+		
+		view.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+		self.view = view;
+		[view release];
+		
+		dataSource1 = [[GlossaryDataSource alloc] initWithXML:@"glossary"];
+		//int rowHeight = 30;
+		//dataSource1.
+		tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, 175,appFrame.size.width-30) style:UITableViewStylePlain];
+		// set the autoresizing mask so that the table will always fill the view
+		//tableView.autoresizingMask = (UIViewAutoresizingFlexibleHeight);
+		
+		//tableView.backgroundColor = [UIColor blackColor];
+		
+		// set the cell separator to a single straight line.
+		tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+		tableView.backgroundColor = [UIColor clearColor];
+
+		// set the tableview delegate to this object and the datasource to the datasource which has already been set
+		tableView.delegate = self;
+		tableView.dataSource = dataSource1;
+		
+		tableView.sectionIndexMinimumDisplayRowCount = 2;
+		glossaryView = [[GlossaryItemView alloc] initWithFrame:CGRectMake(0, 
+																		  0, 
+																		  appFrame.size.height - tableView.frame.size.width, 
+																		  1000)];
+		
+		// set the tableview as the controller view
+		scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(kDefaultMenuWidth + kDefaultBarWidth, 
+																	0, 
+																	appFrame.size.height - tableView.frame.size.width, 
+																	appFrame.size.width)];
+		scrollView.contentSize = glossaryView.frame.size;
+		scrollView.backgroundColor = [UIColor whiteColor];
+		scrollView.autoresizesSubviews = YES;
+		scrollView.delegate = self;
+		scrollView.maximumZoomScale = 5.0;
+		scrollView.minimumZoomScale = 0.5;
+		scrollView.pagingEnabled = NO;
+		[scrollView addSubview:glossaryView];
+		
+		CGSize dividerSize = CGSizeMake(10, 320);
+		UIImage * tempImage = [UIImage imageNamed:@"topAndBottomRow.png"];
+		UIGraphicsBeginImageContext( dividerSize );// a CGSize that has the size you want
+		[tempImage drawInRect:CGRectMake(0,0,dividerSize.width,dividerSize.height)];
+		//image is the original UIImage
+		dividerUnselectedImage = UIGraphicsGetImageFromCurrentImageContext();
+		UIGraphicsEndImageContext();
+		[dividerUnselectedImage retain];
+		[tempImage release];
+		
+		tempImage = [UIImage imageNamed:@"topAndBottomRowSelected.png"];
+		UIGraphicsBeginImageContext( dividerSize );// a CGSize that has the size you want
+		[tempImage drawInRect:CGRectMake(0,0,dividerSize.width,dividerSize.height)];
+		//image is the original UIImage
+		dividerSelectedImage = UIGraphicsGetImageFromCurrentImageContext();
+		UIGraphicsEndImageContext();
+		[dividerSelectedImage retain];
+		
+		dividerBar = [[UIImageView alloc] initWithImage:dividerUnselectedImage];
+		dividerBar.frame = CGRectMake(kDefaultMenuWidth, -6, dividerSize.width,dividerSize.height);
+		dividerBar.userInteractionEnabled = YES;
+		
+		UIImageView * tableBack = [[UIImageView alloc] initWithFrame:tableView.frame];
+		tableBack.image = [UIImage imageNamed:@"loadingContent.png"];
+		
+		[self.view addSubview:tableBack];
+		[self.view addSubview:tableView];
+		[self.view addSubview:scrollView];
+		[self.view addSubview:dividerBar];
+	
+		[tableBack release];
+	}
+	return self;
+}
+
+
+// Implement loadView to create a view hierarchy programmatically, without using a nib.
+
+//- (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView1 {
+//	return glossaryView;
+//}
+//
+//- (void)scrollViewDidEndZooming:(UIScrollView *)scrollView1 withView:(UIView *)view atScale:(float)scale {
+//	[glossaryView setNeedsDisplay];
+//	[scrollView setNeedsDisplay];
+//}
+
+-(BOOL) goToPage:(NSString *)page{
+	[tableView reloadData];
+	
+	NSIndexPath *scrollIndexPath;
+	int row, section;
+	BOOL foundPage = NO;
+	
+	NSMutableArray * names = dataSource1.categoryNames;
+	for(NSString * c in names){
+		NSMutableArray * category = [dataSource1.categories objectForKey:c];
+		for(NSString * n in category){
+			if([[((GlossaryItem* )n).name lowercaseString] isEqualToString:page]){
+				row = [category indexOfObject:n];
+				section = [names indexOfObject:c];
+				foundPage = YES;
+				break;
+			}
+		}
+		
+		if(foundPage)
+			break;
+	}
+	
+	if(foundPage){
+		scrollIndexPath = [NSIndexPath indexPathForRow:row inSection:section];
+		[tableView selectRowAtIndexPath:scrollIndexPath animated:YES scrollPosition:UITableViewScrollPositionMiddle];
+		[self tableView:tableView didSelectRowAtIndexPath:scrollIndexPath];
+	}
+	
+	return foundPage;
+}
+
+BOOL touchedMarker1 = NO;
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    UITouch *touch = [touches anyObject];
+    startTouchPosition = [touch locationInView:self.view];
+	
+	if(CGRectContainsPoint(dividerBar.frame, startTouchPosition)){
+		touchedMarker1 = YES;
+		[dividerBar setImage: dividerSelectedImage];
+	}
+	
+}
+
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+	UITouch *touch = [touches anyObject];
+    CGPoint point = [touch locationInView:self.view];
+	if(touchedMarker1){
+		dividerBar.center = CGPointMake(point.x, dividerBar.center.y);
+		tableView.frame = CGRectMake(0, 0, dividerBar.frame.origin.x + kDefaultBarWidth, scrollView.frame.size.height);
+		scrollView.frame = CGRectMake(dividerBar.frame.origin.x + kDefaultBarWidth, 0,  [[UIScreen mainScreen] applicationFrame].size.height - (dividerBar.frame.origin.x + kDefaultBarWidth), scrollView.frame.size.height);
+		glossaryView.frame = CGRectMake(0, 0, [[UIScreen mainScreen] applicationFrame].size.height - (dividerBar.frame.origin.x + kDefaultBarWidth), glossaryView.frame.size.height);
+
+	}
+	
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+	touchedMarker1 = NO;
+	dividerBar.image = dividerUnselectedImage;
+	
+}
+
+- (void)tableView:(UITableView *)tableView1 didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+	// deselect the new row using animation
+    //[tableView deselectRowAtIndexPath:newIndexPath animated:YES];
+	NSString * section = [dataSource1.categoryNames objectAtIndex: indexPath.section];
+	NSMutableArray * data = [dataSource1.categories objectForKey:section];
+	
+	glossaryView.glossaryItem = [data objectAtIndex:indexPath.row];
+	scrollView.contentSize = glossaryView.frame.size;
+	
+}
+
+
+// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
+- (void)viewDidLoad {
+    [super viewDidLoad];
+	
+	[tableView reloadData];
+}
+
+
+
+// Override to allow orientations other than the default portrait orientation.
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    // Return YES for supported orientations
+	//return YES;
+    return (interfaceOrientation == UIInterfaceOrientationLandscapeLeft || interfaceOrientation == UIInterfaceOrientationLandscapeRight);
+}
+
+
+- (void)didReceiveMemoryWarning {
+	// Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+	
+	// Release any cached data, images, etc that aren't in use.
+}
+
+- (void)viewDidUnload {
+	// Release any retained subviews of the main view.
+	// e.g. self.myOutlet = nil;
+}
+
+
+- (void)dealloc {
+    [super dealloc];
+}
+
+
+@end

@@ -1,0 +1,214 @@
+//
+//  RootViewController.m
+//  Test1
+//
+//  Created by Administrator on 12/14/09.
+//  Copyright 2009 Drexel University. All rights reserved.
+//
+
+#import "NotesViewController.h"
+#import "Test1AppDelegate.h"
+
+@implementation NotesViewController
+
+@synthesize notesTextView;
+
+- (id) init
+{
+	self = [super init];
+	if (self != nil) {
+		self.title = @"Notes";
+		
+		backGroundImage = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"loadingContent.png"]];
+		backGroundImage.frame = CGRectMake(0, 0, 480, 320);
+		
+
+	}
+	return self;
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+	[textField resignFirstResponder];
+	return NO;
+}
+
+/*
+ // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
+        // Custom initialization
+    }
+    return self;
+}
+*/
+
+//+ (NSString *) text {
+//	return notesTextView.text;
+//}
+
+// Implement loadView to create a view hierarchy programmatically, without using a nib.
+- (void)loadView {
+
+	CGRect appFrame = [[UIScreen mainScreen] applicationFrame];
+	UIView *view = [[UIView alloc] initWithFrame:appFrame];
+	view.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+	self.view = view;
+	[view release];
+	
+	[self.view addSubview:backGroundImage];
+	
+	UIToolbar *bar = [UIToolbar new];
+	bar.barStyle = UIBarStyleBlackOpaque;
+	
+	// size up the toolbar and set its frame
+	[bar sizeToFit];
+	CGFloat toolbarHeight = [bar frame].size.height;
+	CGRect mainViewBounds = self.view.bounds; //view of your viewcontroller
+	[bar setFrame:CGRectMake(0,
+							 0,
+							 appFrame.size.height,
+							 toolbarHeight)];
+	
+	//add button
+	// create a bordered style button with custom image
+	UIBarButtonItem *editItem = [[UIBarButtonItem alloc] initWithTitle:@"Edit" 
+																 style:UIBarButtonItemStyleBordered
+																  target:self
+																  action:@selector(showKeyboard)];
+	
+	UILabel * textLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 200, 15)];
+	textLabel.textAlignment = UITextAlignmentCenter;
+	textLabel.font = [UIFont systemFontOfSize:13.0f];
+	textLabel.textColor = [UIColor whiteColor];
+	textLabel.backgroundColor = [UIColor clearColor];
+	textLabel.adjustsFontSizeToFitWidth = NO;
+	textLabel.text = @"Your Notes";
+	
+	UIBarButtonItem *textItem = [[UIBarButtonItem alloc] initWithCustomView:textLabel];
+	
+	UIBarButtonItem *doneItem = [[UIBarButtonItem alloc] initWithTitle:@"Done"
+																 style:UIBarButtonItemStyleDone
+																target:self
+																action:@selector(returnFromTextView)];
+	UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+
+	//editItem.width = 50.0f; //you can set the width of the icon
+	//editItem.title= @"Selection"; //set text below image icon
+	self.navigationController.navigationItem.rightBarButtonItem = doneItem;
+	//self.navigationItem.rightBarButtonItem = editItem;
+	//self.navigationItem.leftBarButtonItem = doneItem;
+	
+	//note the nil at the end
+	NSArray *items = [NSArray arrayWithObjects: editItem, flexibleSpace, textItem, flexibleSpace, doneItem, nil];
+	[bar setItems:items animated:NO];
+	[self.view addSubview:bar];
+	[textLabel release];
+	
+	UIScrollView *myScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, bar.frame.size.height, 480, 320)];
+	[myScrollView setContentSize:CGSizeMake(480, 1000)];
+	myScrollView.backgroundColor = [UIColor clearColor];
+	
+//	Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+	notesTextView = [[UITextView alloc] initWithFrame: CGRectMake(5, 0	, 480, 1000)];
+	notesTextView.backgroundColor = [UIColor clearColor];
+	notesTextView.delegate = self;
+	notesTextView.autocorrectionType = UITextAutocorrectionTypeNo;
+	notesTextView.font = [UIFont systemFontOfSize:14];
+	notesTextView.textColor = [UIColor whiteColor];
+	//notesTextView.text = "Click edit to write notes, and done to exit.";
+	[notesTextView setUserInteractionEnabled:FALSE];
+
+	[myScrollView addSubview:notesTextView];
+	
+	[self.view addSubview:myScrollView];
+
+	[myScrollView release];
+
+	
+	[editItem release];
+	[flexibleSpace release];
+	[doneItem release];
+	[bar release]; 
+}
+
+- (void) returnFromTextView {
+	NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+	[defaults setObject:notesTextView.text forKey:@"notes"];
+	
+	[notesTextView resignFirstResponder];
+}
+
+- (void) showKeyboard {
+	[notesTextView becomeFirstResponder];	
+}
+
+
+// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
+- (void)viewDidLoad {
+    [super viewDidLoad];
+	
+	NSString * temp1 = [[NSUserDefaults standardUserDefaults] stringForKey:@"notes"];
+	//[notesViewController.notesTextView setText:[[NSString alloc] initWithFormat:@"%@",temp1]];
+	NSString * newString = [[NSString alloc] initWithFormat:@"%@",temp1];
+	//[notesViewController.notesTextView performSelectorOnMainThread:@selector(setText:) withObject:newString waitUntilDone:YES];
+	if(newString && ![newString isEqualToString:@"(null)"])
+		notesTextView.text = newString;
+	else
+		notesTextView.text = @"";
+	
+	[notesTextView becomeFirstResponder];	
+
+}
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    UITouch *touch = [touches anyObject];
+    startTouchPosition = [touch locationInView:[self view]];
+	
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+	
+	UITouch *touch = [touches anyObject];
+    CGPoint currentTouchPosition = [touch locationInView:[self view]];
+	
+	// If we just touched the screen, show the 
+	if (fabsf(startTouchPosition.x - currentTouchPosition.x) <= HORIZ_SWIPE_DRAG_MIN &&
+        fabsf(startTouchPosition.y - currentTouchPosition.y) <= VERT_SWIPE_DRAG_MAX)
+    {
+		Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+		[appDelegate.splashViewController fadeTabBar];
+		
+	}
+	
+	// reset the touch posistion
+	startTouchPosition.x = 0.0;
+	startTouchPosition.y = 0.0;
+	
+}
+
+// Override to allow orientations other than the default portrait orientation.
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    // Return YES for supported orientations
+    return (interfaceOrientation == UIInterfaceOrientationLandscapeLeft);
+}
+
+
+- (void)didReceiveMemoryWarning {
+	// Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+	
+	// Release any cached data, images, etc that aren't in use.
+}
+
+- (void)viewDidUnload {
+	// Release any retained subviews of the main view.
+	// e.g. self.myOutlet = nil;
+}
+
+
+- (void)dealloc {
+    [super dealloc];
+}
+
+
+@end

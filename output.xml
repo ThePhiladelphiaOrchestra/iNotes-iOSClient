@@ -1,0 +1,344 @@
+<?xml version="1.0"?>
+<concert>
+  <piece name="Bach, Movement 3: Gavotte I, II" measures="150">
+  <audio>Bach3.mp3</audio>
+    <track name="In the Moment">
+      <page time="1" measure="1">
+        <text>Bach Orchestral Suite No. 2, Movement 3: Gavotte I, II $bachpic.png, Johann Sebastian Bach</text>
+      </page>
+      <page time="2" measure="2">
+        <text>This Orchestral Suite is a collection of music written for dancing.</text>
+      </page>
+      <page time="15" measure="12">
+        <text>The first few lines of the piece now repeat. Listen as the trumpets reinforce the melody. $trumpet.jpg, trumpet</text>
+      </page>
+      <page time="29" measure="23">
+        <text>New melody now. Listen as the oboes and violins exchange prominence. $violin.png, violin</text>
+      </page>
+      <page time="35" measure="28">
+        <text>Listen for the viola and bass sections to fill out the harmony. $bass.png, string bass</text>
+      </page>
+      <page time="47" measure="36">
+        <text>The section will repeat shortly.</text>
+      </page>
+      <page time="52" measure="40">
+        <text>The section repeats from the beginning.</text>
+      </page>
+      <page time="59" measure="46">
+        <text>Again, listen to the violins and oboes. $oboe.png, oboe</text>
+      </page>
+      <page time="69" measure="53">
+        <text>The first Gavotte is now ending.</text>
+      </page>
+      <page time="74" measure="57">
+        <text>The second Gavotte begins. Note the new melody.</text>
+      </page>
+      <page time="84" measure="64">
+        <text>The violins and violas are most prominent here. See if you can hear the violas, which are lower in pitch than the violins. $viola.jpg, the viola, slightly larger than the violin</text>
+      </page>
+      <page time="93" measure="71">
+        <text>The first theme of the second Gavotte is about to repeat.</text>
+      </page>
+      <page time="97" measure="74">
+        <text>The first section of the second Gavotte begins to repeat.</text>
+      </page>
+      <page time="106" measure="81">
+        <text>Again, listen for both violins and violas stating the main theme.</text>
+      </page>
+      <page time="116" measure="88">
+        <text>The next section is about to begin.</text>
+      </page>
+      <page time="120" measure="91">
+        <text>The trumpets have a more pronounced influence in this section. Listen for them as they fanfare in the beginnings of phrases $trumpet.jpg, trumpet</text>
+      </page>
+      <page time="129" measure="98">
+        <text>The entire orchestra enters as the section nears its conclusion.</text>
+      </page>
+      <page time="139" measure="105">
+        <text>The second section is about to repeat.</text>
+      </page>
+      <page time="143" measure="108">
+        <text>The second section begins to repeat.</text>
+      </page>
+      <page time="154" measure="116">
+        <text>Again, listen for the combinations of instruments and their interplay.</text>
+      </page>
+      <page time="162" measure="122">
+        <text>The first Gavotte will repeat shortly.</text>
+      </page>
+      <page time="166" measure="125">
+        <text>The first Gavotte is repeating. Listen to the last notes of the three-note sequences as they have changed.</text>
+      </page>
+      <page time="176" measure="133">
+        <text>This part is the same as before, except that there is no repeat. The second section of the first Gavotte will follow shortly.</text>
+      </page>
+      <page time="185" measure="140">
+        <text>Again, the ends of three note sequences contain ornamental playing. $notes.jpg, three note sequence with markings for ornamental playing</text>
+      </page>
+      <page time="194" measure="146">
+        <text>The piece continues towards the end of the first Gavotte and concludes.</text>
+      </page>
+    </track>
+    <track name="Behind the Music">
+      <page time="1" measure="1">
+        <text>Bach Orchestral Suite No. 2, Movement 3: Gavotte I, II $bachpic.png, Johann Sebastian Bach</text>
+      </page>
+      <page time="2" measure="2">
+        <text>The first of two Gavottes begin.</text>
+      </page>
+      <page time="7" measure="6">
+        <text>A Gavotte is a strictly binary work with two repeating sections</text>
+      </page>
+      <page time="11" measure="9">
+        <text>We are in the A section</text>
+      </page>
+      <page time="15" measure="12">
+        <text>The A section now repeats</text>
+      </page>
+      <page time="18" measure="15">
+        <text>Notice that the piece returns to the dance-like music of the rest of the suite</text>
+      </page>
+      <page time="24" measure="19">
+        <text>The A section ends in the modulated key of A major</text>
+      </page>
+      <page time="29" measure="23">
+        <text>The B section now begins, and starts of more unsettled than the A section</text>
+      </page>
+      <page time="35" measure="28">
+        <text>This uneasiness is brought about by modulating from the beginning and not setting up a particular key</text>
+      </page>
+      <page time="41" measure="32">
+        <text>The uneasiness settles and some melodic elements from the A section return</text>
+      </page>
+      <page time="45" measure="35">
+        <text>Some modulation and resolution occurs quickly as the B section ends.</text>
+      </page>
+      <page time="52" measure="40">
+        <text>The section now repeats</text>
+      </page>
+      <page time="58" measure="45">
+        <text>Listen once again for the uneasiness and movement created by the constant modulation</text>
+      </page>
+      <page time="74" measure="57">
+        <text>The second Gavotte begins. Note the new melody.</text>
+      </page>
+      <page time="82" measure="63">
+        <text>Note the call and response in the melodic structure</text>
+      </page>
+      <page time="88" measure="67">
+        <text>The call is strong and stark, while the response is smooth and flowing.</text>
+      </page>
+      <page time="97" measure="74">
+        <text>The theme now repeats.</text>
+      </page>
+      <page time="101" measure="77">
+        <text>Call and response once again</text>
+      </page>
+      <page time="106" measure="81">
+        <text>Smooth flowing modulating lines contrast the boisterousness of the call and response</text>
+      </page>
+      <page time="113" measure="86">
+        <text>The section ends with call and response once again</text>
+      </page>
+      <page time="120" measure="91">
+        <text>The new section now begins, and starts off more uneasy than the A section</text>
+      </page>
+      <page time="124" measure="94">
+        <text>The call and response is less boisterous and begins to modulate</text>
+      </page>
+      <page time="134" measure="101">
+        <text>As the contrasting smooth lines enter, they no longer modulate.</text>
+      </page>
+      <page time="143" measure="108">
+        <text>The section now repeats</text>
+      </page>
+      <page time="148" measure="112">
+        <text>A gavotte is a lively French folk dance.</text>
+      </page>
+      <page time="155" measure="117">
+        <text>Liveliness is created with the beginning of melodies starting in-between measures, rather than at beginnings</text>
+      </page>
+      <page time="161" measure="121">
+        <text>A gavotte's melody generally begins on the third beat of the measure</text>
+      </page>
+      <page time="166" measure="125">
+        <text>The first gavotte now repeats itself again</text>
+      </page>
+      <page time="171" measure="129">
+        <text>This time, no repeats are followed, and the gavotte is played straight through</text>
+      </page>
+      <page time="178" measure="134">
+        <text>Notice once again melodies starting on beat three of measures</text>
+      </page>
+      <page time="185" measure="140">
+        <text>The next section now begins</text>
+      </page>
+      <page time="192" measure="145">
+        <text>This section is played once through as well.</text>
+      </page>
+      <page time="199" measure="150">
+        <text>The section ends and the movement comes to a close.</text>
+      </page>
+    </track>
+    <track name="The Music">
+      <page time="1" measure="1">
+        <text>Bach Orchestral Suite No. 2, Movement 3: Gavotte I, II $bachpic.png, Johann Sebastian Bach</text>
+      </page>
+      <page time="2" measure="2">
+        <text>The Gavotte is a French folk dance. It is a strictly binary work with two repeating sections. $dance.png, dance</text>
+      </page>
+      <page time="15" measure="12">
+        <text>The first main theme now repeats. Listen as the trumpets reinforce it. $trumpet.png, trumpet</text>
+      </page>
+      <page time="23" measure="18">
+        <text>The end of the first theme modulates from D major to A major. A second theme will enter shortly.</text>
+      </page>
+      <page time="29" measure="23">
+        <text>A second theme begins.  Listen as the oboes and violins exchange prominence. $oboe.png, oboe</text>
+      </page>
+      <page time="35" measure="28">
+        <text>The viola and bass sections to fill out the harmony. $bass.png, string bass</text>
+      </page>
+      <page time="45" measure="35">
+        <text>This section will repeat shortly.</text>
+      </page>
+      <page time="51" measure="39">
+        <text>The second section now repeats.</text>
+      </page>
+      <page time="59" measure="46">
+        <text>The violin and oboe once again take control of the melody. $violin.png, violin</text>
+      </page>
+      <page time="68" measure="52">
+        <text>The first of two Gavottes approaches its conclusion</text>
+      </page>
+      <page time="74" measure="56">
+        <text>The second Gavotte begins. Note the new melody.</text>
+      </page>
+      <page time="82" measure="63">
+        <text>Note the call and response in the melodic structure. The call is strong and stark, while the response is smooth and flowing.</text>
+      </page>
+      <page time="91" measure="69">
+        <text>The first theme of the second Gavotte is about to repeat.</text>
+      </page>
+      <page time="97" measure="73">
+        <text>The theme now repeats.</text>
+      </page>
+      <page time="105" measure="80">
+        <text>Both violin and viola state a flowing theme that contrasts with the boisterousness of the call and response. $viola.png, viola</text>
+      </page>
+      <page time="113" measure="86">
+        <text>The first section ends with call and response once again. A new theme will enter shortly.</text>
+      </page>
+      <page time="119" measure="90">
+        <text>The new section now begins more unsettled than the previous section due to constant modulation. Listen as the tonal center continues to shift.</text>
+      </page>
+      <page time="132" measure="100">
+        <text>The demonstration ends as this section comes to a close. Thank You.</text>
+      </page>
+      <page time="139" measure="105">
+        <text>The second section is about to repeat.</text>
+      </page>
+      <page time="148" measure="112">
+        <text>This Orchestral Suite is written for dancing. A Gavotte is a lively French folk dance. $dance. png,</text>
+      </page>
+      <page time="155" measure="117">
+        <text>Liveliness is created with the beginning of melodies starting in-between measures, rather than at beginnings.</text>
+      </page>
+      <page time="162" measure="122">
+        <text>The demonstration ends as this section comes to a close. Thank You.</text>
+      </page>
+    </track>
+    <track name="Structure">
+      <page time="1" measure="1">
+        <text>A</text>
+      </page>
+      <page time="7" measure="6">
+        <text>B</text>
+      </page>
+      <page time="15" measure="12">
+        <text>A</text>
+      </page>
+      <page time="21" measure="17">
+        <text>B</text>
+      </page>
+      <page time="29" measure="23">
+        <text>C</text>
+      </page>
+      <page time="35" measure="28">
+        <text>D</text>
+      </page>
+      <page time="41" measure="32">
+        <text>A</text>
+      </page>
+      <page time="45" measure="35">
+        <text>C</text>
+      </page>
+      <page time="52" measure="40">
+        <text>C</text>
+      </page>
+      <page time="58" measure="45">
+        <text>D</text>
+      </page>
+      <page time="65" measure="50">
+        <text>A</text>
+      </page>
+      <page time="69" measure="53">
+        <text>C</text>
+      </page>
+      <page time="74" measure="57">
+        <text>E</text>
+      </page>
+      <page time="81" measure="62">
+        <text>F</text>
+      </page>
+      <page time="89" measure="68">
+        <text>G</text>
+      </page>
+      <page time="97" measure="74">
+        <text>E</text>
+      </page>
+      <page time="103" measure="79">
+        <text>F</text>
+      </page>
+      <page time="112" measure="85">
+        <text>G</text>
+      </page>
+      <page time="120" measure="91">
+        <text>H</text>
+      </page>
+      <page time="126" measure="96">
+        <text>I</text>
+      </page>
+      <page time="132" measure="100">
+        <text>J</text>
+      </page>
+      <page time="143" measure="108">
+        <text>H</text>
+      </page>
+      <page time="149" measure="113">
+        <text>I</text>
+      </page>
+      <page time="155" measure="117">
+        <text>J</text>
+      </page>
+      <page time="166" measure="125">
+        <text>A</text>
+      </page>
+      <page time="172" measure="130">
+        <text>B</text>
+      </page>
+      <page time="180" measure="136">
+        <text>C</text>
+      </page>
+      <page time="185" measure="140">
+        <text>C</text>
+      </page>
+      <page time="192" measure="145">
+        <text>A</text>
+      </page>
+      <page time="197" measure="148">
+        <text>C</text>
+      </page>
+    </track>
+  </piece>
+</concert>

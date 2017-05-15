@@ -1,0 +1,86 @@
+//
+//  DataPage.m
+//  Test1
+//
+//  Created by Administrator on 11/18/09.
+//  Copyright 2009 Drexel University. All rights reserved.
+//
+
+#import "DataPage.h"
+
+
+@implementation DataPage
+
+@synthesize measure, text, time, html, images,structure,parentTrack;
+
+- (id) init
+{
+	self = [super init];
+	if (self != nil) {
+		measure = 0;
+		text = nil;
+		structure = nil;
+		parentTrack = nil;
+		time = 0.0;
+		html = TEXT_ONLY;
+		//images = [[NSMutableArray alloc] init];
+	}
+	return self;
+}
+
+- (void) extractAndRemoveImageData:(NSString **) theText{
+	NSArray * parts = [*theText componentsSeparatedByString:@"$"];
+	if([parts count] > 1){
+		if([[parts objectAtIndex:0] isEqualToString:@""]){
+			NSString * image1 = [parts objectAtIndex:1];
+			NSArray * partsImages = [image1 componentsSeparatedByString:@","];
+			//[images addObject:partsImages];
+			self.images = partsImages;
+			self.html = PICTURE_ONLY;
+
+		}
+		else{
+			for(int i=1; i<[parts count]; i++){
+				NSString * image1 = [parts objectAtIndex:i];
+				NSArray * partsImages = [image1 componentsSeparatedByString:@","];
+				//[images addObject:partsImages];
+				self.images = partsImages;
+
+				
+				NSString * temp = [*theText stringByReplacingOccurrencesOfString:image1 withString:@""];
+				[*theText release];
+				[temp retain];
+				*theText = temp;
+			}
+			
+			NSString * temp1 = [*theText stringByReplacingOccurrencesOfString:@"$" withString:@""];
+			[*theText release];
+			[temp1 retain];
+			*theText = temp1;
+			
+			self.html = TEXT_AND_PICTURE;
+
+		}
+		
+	}
+	else{
+		self.html = TEXT_ONLY;
+	}
+	
+	//NSLog(*theText);
+	
+
+
+//	NSString *regex = @"$*$";
+//	
+//	NSPredicate *regextest = [NSPredicate
+//							  predicateWithFormat:@"SELF MATCHES %@", regex];
+//	[regextest e
+//	if ([regextest evaluateWithObject:theText] == YES) {
+//		NSLog(@"Match!");
+//	} else {
+//		NSLog(@"No match!");
+//	}	
+}
+
+@end

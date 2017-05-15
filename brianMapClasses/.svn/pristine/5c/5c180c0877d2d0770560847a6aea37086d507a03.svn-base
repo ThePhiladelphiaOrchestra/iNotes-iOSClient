@@ -1,0 +1,31 @@
+//
+//  PathBandsView.h
+//  Test1
+//
+//  Created by Brian Dolhansky on 5/26/10.
+//  Copyright 2010 __MyCompanyName__. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+@class PathView;
+
+@interface PathBandsView : UIView {
+	NSMutableArray* dataPoints;
+	NSMutableArray* bandText;
+	NSMutableArray* uniqueYPoints;
+	float avgSpacing;
+	PathView* pathView;
+	BOOL needsDrawing;
+	int numDraws;
+}
+
+- (void)setDataPoints:(NSMutableArray *)newDataPoints;
+- (void)setUniqueYPoints:(NSMutableArray *)newUniqueYPoints;
+- (void)setBandText:(NSMutableArray *)newBandText;
+
+@property(nonatomic, assign) BOOL needsDrawing;
+@property(nonatomic, retain) PathView* pathView;
+@property(nonatomic, retain) NSMutableArray* bandText;
+
+@end

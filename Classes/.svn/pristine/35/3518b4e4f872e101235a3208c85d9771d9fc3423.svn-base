@@ -1,0 +1,104 @@
+//
+//  PageView.m
+//  Test1
+//
+//  Created by Administrator on 2/16/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import "PageView.h"
+#import "Test1AppDelegate.h"
+
+
+@implementation PageView
+
+@synthesize webView;
+
+- (id)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+		self.backgroundColor = [UIColor clearColor];
+		
+		webView = [[UIWebView alloc] initWithFrame:frame];
+		webView.backgroundColor = [UIColor clearColor];
+		webView.contentStretch = frame;
+		webView.opaque = NO;
+		webView.userInteractionEnabled = YES;
+		webView.delegate = self;
+		
+		[self addSubview:webView];
+    }
+    return self;
+}
+
+
+- (void)drawRect:(CGRect)rect {
+    // Drawing code
+}
+
+
+- (void)dealloc {
+    [super dealloc];
+}
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+	printf("Touches Began in PageView\n");
+	//[webView touchesEnded:touches withEvent:event];
+}
+
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
+    NSLog(@"Hit Test");
+	
+    UIView * viewTouched = [super hitTest:point withEvent:event];
+	[webView hitTest:point withEvent:event];
+    return self;
+}
+
+- (BOOL)webView:(UIWebView*)webView1 shouldStartLoadWithRequest:(NSURLRequest*)request navigationType:(UIWebViewNavigationType)navigationType {
+	
+	NSString *path = [[request URL] path];
+	NSLog(path);
+	
+	NSString * linkText = [path lastPathComponent];
+	NSLog(linkText);
+	
+	switch (navigationType) {
+		case UIWebViewNavigationTypeLinkClicked:
+			printf("UIWebViewNavigationTypeLinkClicked");
+			break;
+		case UIWebViewNavigationTypeFormSubmitted:
+			printf("UIWebViewNavigationTypeFormSubmitted");
+			break;
+		case UIWebViewNavigationTypeBackForward:
+			printf("UIWebViewNavigationTypeBackForward");
+			break;
+		case UIWebViewNavigationTypeFormResubmitted:
+			printf("UIWebViewNavigationTypeFormResubmitted");
+			break;
+		case UIWebViewNavigationTypeReload:
+			printf("UIWebViewNavigationTypeReload");
+			break;
+		case UIWebViewNavigationTypeOther:
+			printf("UIWebViewNavigationTypeOther");
+			break;
+	}
+	
+	if(navigationType == UIWebViewNavigationTypeLinkClicked){
+		printf("Link clicked: %@ \n", linkText);
+		
+		Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+		GlossaryViewController * glossary = appDelegate.glossary;
+		glossary.navigationItem.title = linkText;
+		
+		//[appDelegate.splashViewController.mainViewController fadeTabBar];
+		[glossary goToPage:linkText];
+		
+		[appDelegate.splashViewController.mainViewController.trackTabBar.navigationController pushViewController:glossary animated:YES];
+		
+		return YES;
+	}
+	else{
+		return YES;
+	}
+}
+
+@end

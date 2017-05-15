@@ -1,0 +1,29 @@
+//
+//  GradientView.h
+//  MapDemo
+//
+//  Created by Administrator on 4/5/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+typedef enum  {
+	kGradientTypeTop,
+	kGradientTypeMiddle,
+	kGradientTypeBottom
+} GradientType;
+	
+@interface GradientView : UIView {
+	UIColor * startColor;
+	UIColor * endColor;
+	float gradientHeight;
+	GradientType gradientType;
+}
+
+@property (nonatomic, retain) UIColor * startColor;
+@property (nonatomic, retain) UIColor * endColor;
+@property (nonatomic, assign) float gradientHeight;
+@property (nonatomic, assign) GradientType gradientType;;
+
+@end

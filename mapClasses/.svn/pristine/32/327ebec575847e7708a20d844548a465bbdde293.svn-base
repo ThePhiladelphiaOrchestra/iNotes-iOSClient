@@ -1,0 +1,124 @@
+//
+//  GradientView.m
+//  MapDemo
+//
+//  Created by Administrator on 4/5/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import "GradientView.h"
+
+
+@implementation GradientView
+
+@synthesize startColor, endColor,gradientHeight,gradientType;
+
+- (id)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+        // Initialization code
+    }
+    return self;
+}
+
+
+- (void)drawRect:(CGRect)rect {
+	CGContextRef currentContext = UIGraphicsGetCurrentContext();
+	
+    CGGradientRef glossGradient;
+    CGColorSpaceRef rgbColorspace;
+	CGRect currentBounds;
+	CGPoint topCenter;
+	CGPoint midCenter;
+	
+    size_t num_locations = 2;
+    CGFloat locations[2] = { 0.0, 1.0 };
+	
+	CGColorRef color = [startColor CGColor];
+
+	int numComponents = CGColorGetNumberOfComponents(color);
+
+	const CGFloat *components = CGColorGetComponents(color);
+	CGFloat redStart, greenStart, blueStart, alphaStart;
+		
+	if (numComponents == 4){
+	switch (gradientType) {
+		case kGradientTypeTop:
+			CGContextSetFillColor(currentContext, components);
+			CGContextFillRect(currentContext, CGRectMake(0, 0, self.frame.size.width, self.frame.size.height - gradientHeight));
+			
+			redStart = components[0];
+			greenStart = components[1];
+			blueStart = components[2];
+			alphaStart = components[3];
+			
+			CGFloat components0[8] = {	redStart, greenStart, blueStart, alphaStart, // Start color
+			redStart, greenStart, blueStart, 0.0 }; // End color
+			
+			rgbColorspace = CGColorSpaceCreateDeviceRGB();
+			glossGradient = CGGradientCreateWithColorComponents(rgbColorspace, components0, locations, num_locations);
+			
+			currentBounds = self.frame;
+			topCenter = CGPointMake(currentBounds.size.width/2, currentBounds.size.height - gradientHeight);
+			midCenter = CGPointMake(currentBounds.size.width/2, currentBounds.size.height);
+			CGContextDrawLinearGradient(currentContext, glossGradient, topCenter, midCenter, 0);
+
+			break;
+		case kGradientTypeMiddle:
+			CGContextSetFillColor(currentContext, components);
+			CGContextFillRect(currentContext, CGRectMake(0, gradientHeight, self.frame.size.width, self.frame.size.height - gradientHeight*2));
+			
+			redStart = components[0];
+			greenStart = components[1];
+			blueStart = components[2];
+			alphaStart = components[3];
+			
+			CGFloat components1[8] = {	redStart, greenStart, blueStart, alphaStart, // Start color
+			redStart, greenStart, blueStart, 0.0 }; // End color
+			
+			rgbColorspace = CGColorSpaceCreateDeviceRGB();
+			glossGradient = CGGradientCreateWithColorComponents(rgbColorspace, components1, locations, num_locations);
+			
+			currentBounds = self.frame;
+			topCenter = CGPointMake(currentBounds.size.width/2, currentBounds.size.height - gradientHeight);
+			midCenter = CGPointMake(currentBounds.size.width/2, currentBounds.size.height);
+			CGContextDrawLinearGradient(currentContext, glossGradient, topCenter, midCenter, 0);
+			
+			CGFloat components2[8] = {	redStart, greenStart, blueStart, 0.0, // Start color
+			redStart, greenStart, blueStart, alphaStart }; // End color
+			
+			rgbColorspace = CGColorSpaceCreateDeviceRGB();
+			glossGradient = CGGradientCreateWithColorComponents(rgbColorspace, components2, locations, num_locations);
+			
+			currentBounds = self.frame;
+			topCenter = CGPointMake(currentBounds.size.width/2, 0);
+			midCenter = CGPointMake(currentBounds.size.width/2, gradientHeight);
+			CGContextDrawLinearGradient(currentContext, glossGradient, topCenter, midCenter, 0);
+			break;
+		case kGradientTypeBottom:
+			
+			break;
+		default:
+			break;
+	}
+	}
+
+//		const CGFloat *componentsEnd = CGColorGetComponents(colorEnd);
+//		CGFloat redEnd = componentsEnd[0];
+//		CGFloat greenEnd = componentsEnd[1];
+//		CGFloat blueEnd = componentsEnd[2];
+//		CGFloat alphaEnd = componentsEnd[3];
+	
+
+	CGGradientRelease(glossGradient);
+	CGColorSpaceRelease(rgbColorspace);
+ 
+	
+}
+
+
+- (void)dealloc {
+    [super dealloc];
+}
+
+
+@end

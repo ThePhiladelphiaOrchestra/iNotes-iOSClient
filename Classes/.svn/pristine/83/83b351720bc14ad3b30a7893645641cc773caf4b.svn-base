@@ -1,0 +1,20 @@
+//
+//  Utility.h
+//  Untitled
+//
+//  Created by Administrator on 2/15/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+
+@interface Utility : NSObject {
+
+}
+
++(UIColor *)randomColor;
++ (UIImage *) colorizeImage:(UIImage *)baseImage color:(UIColor *)theColor;
++ (UIImage *) resizeImage:(UIImage*) input toSize:(CGSize) size;
+
+@end

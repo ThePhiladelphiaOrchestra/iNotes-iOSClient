@@ -1,0 +1,636 @@
+//
+//  MapViewController.m
+//  MapDemo
+//
+//  Created by Administrator on 4/5/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import "MapViewController.h"
+#import "Test1AppDelegate.h"
+
+#define TAB_BAR_HEIGHT 50
+#define NUM_TRACKS 1
+
+
+
+
+@implementation MapViewController
+
+@synthesize dataArray,mode;
+
+Test1AppDelegate * appDelegate;
+
+- (id) init
+{
+	self = [super init];
+	if (self != nil) {
+		appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+		
+		CGRect appFrame = [[UIScreen mainScreen] applicationFrame];
+		UIView *view = [[UIView alloc] initWithFrame:appFrame];
+		view.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+		self.view = view;
+		
+		[view release];
+		
+		self.view.backgroundColor = [UIColor blackColor];
+		
+		mapBackground = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 480, 320)];
+		mapBackground.tag = @"map";
+		
+		//UIImageView * backgroundView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"loadingContent.png"]];
+		backgroundView = [[BackgroundView alloc] initWithFrame:CGRectMake(0, 0, 480, 320)];
+		
+		float scale = 3.0;
+		
+		UIImageView * backgroundView1 = [[UIImageView alloc] initWithFrame:CGRectMake(0,0, 480*scale, 320*scale)];
+		backgroundView1.image = [Utility resizeImage:[UIImage imageNamed:@"loadingContent.png"] toSize:backgroundView1.frame.size];
+		
+		UIImageView * backgroundView2 = [[UIImageView alloc] initWithFrame:CGRectMake(0,0, 480*scale, 320*scale)];
+		backgroundView2.image = [Utility resizeImage:[UIImage imageNamed:@"loadingContent.png"] toSize:backgroundView2.frame.size];
+		
+		//backgroundView.frame = CGRectMake(0, 0, 480, 320);
+		backgroundView.alpha = 1.0;
+		[backgroundView addImageView:backgroundView1];
+		[backgroundView addImageView:backgroundView2];
+		[backgroundView1 release];
+		[backgroundView2 release];
+		
+		[mapBackground addSubview:backgroundView];
+		
+		scrollView = [[MapScrollView alloc] initWithFrame:CGRectMake(0, 0, 480, 320)];
+		scrollView.contentSize = scrollView.frame.size;
+		scrollView.delegate = self;
+		scrollView.maximumZoomScale = 20.0;
+		scrollView.minimumZoomScale = 1.0;
+		scrollView.bouncesZoom = YES;
+		
+		[scrollView addObserver:self 
+					   forKeyPath:@"contentSize"
+						  options:(NSKeyValueObservingOptionNew) 
+						  context:NULL];
+		
+		[scrollView addSubview:mapBackground];
+		[self.view addSubview:scrollView];
+
+		
+//		bottomBar = [[UITabBar alloc] initWithFrame:CGRectMake(0, 320 - TAB_BAR_HEIGHT, 480, TAB_BAR_HEIGHT)];
+//		bottomBar.delegate = self;
+//		
+//		NSMutableArray * items = [[NSMutableArray alloc] init];
+//		
+//		for (int i =0; i < NUM_TRACKS; i++){
+//			UITabBarItem * item1 = [[UITabBarItem alloc] initWithTitle:[NSString stringWithFormat:@"Track %d",i] 
+//																 image:[UIImage imageNamed:@"purple.png"] 
+//																   tag:i];
+//			[items addObject:item1];
+//			[item1 release];
+//		}
+//		[bottomBar setItems:items];
+//		[self.view addSubview:bottomBar];
+
+		myTimer = [[NSTimer alloc] init];
+
+		pinArray = [[NSMutableArray alloc] init];
+		//[NSTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(updatePosition) userInfo:nil repeats:YES];
+	}
+	return self;
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath   ofObject:(id)object   change:(NSDictionary *)change   context:(void *)context { 
+	
+	// Correct Object Class.
+	UIScrollView *pointer = object;
+	float zoomScale = pointer.zoomScale;
+	printf("observer : %f\n",pointer.zoomScale);
+	
+	float percentAlpha = (zoomScale - 1) / (FIRST_LEVEL_ZOOM - 1);
+	percentAlpha = (percentAlpha > 1.0 ? 1.0 : percentAlpha);
+	
+	for(MarkerView * m in pinArray){
+		m.frame = CGRectMake((m.location.x)*zoomScale - m.frame.size.width/2, (m.location.y )*zoomScale - m.frame.size.height, m.frame.size.width, m.frame.size.height);
+//		if(m.type == TYPE_OTHER){
+//			m.alpha = percentAlpha;
+//		}
+	}
+	
+	if(zoomScale > FIRST_LEVEL_ZOOM)
+		scrollView.callout.center = CGPointMake(scrollView.callout.center.x*zoomScale, scrollView.callout.center.y*zoomScale);
+	else{
+		scrollView.callout.center = CGPointMake(-500,-500);
+
+//		if (scrollView.callout != nil) {
+//			[scrollView.callout removeFromSuperview];
+//			//scrollView.callout = nil;
+//		}
+	}
+//	// Calculate Center.
+//	CGFloat topCorrect = ([pointer bounds].size.height - [pointer viewWithTag:100].bounds.size.height * [pointer zoomScale])  / 2.0 ;
+//	topCorrect = ( topCorrect < 0.0 ? 0.0 : topCorrect );
+//	
+//	topCorrect = topCorrect - (  pointer.frame.origin.y - imageGallery.frame.origin.y );
+//	
+//	// Apply Correct Center.
+//	pointer.center = CGPointMake(pointer.center.x,
+//								 pointer.center.y + topCorrect ); 
+}
+
+- (void) updatePosition {
+	
+	if(appDelegate.mode == DEMO_MODE){
+		//float frac = ([appDelegate.player currentTime]/[appDelegate.player duration]);
+		//printf("%s %f\n", [dataArray.name cString], frac);
+		if(mode == MAP)
+			path.cursorTime = [appDelegate.player currentTime];
+	}
+	else{
+		if(dataArray){
+			Track * timeTrack = [dataArray trackWithName:@"NumSeconds"];
+			if(timeTrack){
+				DataPage * d = [timeTrack pageWithMeasure: appDelegate.CURRENT_MEASURE];
+				if(d)
+					path.cursorTime = d.time;
+			}
+		}
+	}
+	
+}
+
+- (void)tabBar:(UITabBar *)tabBar didSelectItem:(UITabBarItem *)item{
+//	int index = item.tag;
+//	printf("%d\n", index);
+//	
+//	for(PathView * p in pathArray){
+//		
+//		[UIView beginAnimations:nil context:nil]; // begins animation block
+//		[UIView setAnimationDuration:0.3];        // sets animation duration
+//		[UIView setAnimationDelegate:self];        // sets delegate for this block
+//		p.alpha = 0.1;
+//		[UIView commitAnimations]; 
+//		
+//		for(MarkerView * m in p.dataPoints){
+//			m.alpha = 0.0;
+//			m.frame = CGRectMake(m.frame.origin.x, m.location.y - 40, m.frame.size.width, m.frame.size.height);
+//		}
+//	}
+//	
+//	selectedPath = [pathArray objectAtIndex:index];
+//	[UIView beginAnimations:nil context:selectedPath.dataPoints]; // begins animation block
+//	[UIView setAnimationDuration:0.3];        // sets animation duration
+//	[UIView setAnimationDelegate:self];        // sets delegate for this block
+//	[UIView setAnimationDidStopSelector:@selector(animationFinished:finished:context:)];
+//	selectedPath.alpha = 1.0;
+//	[UIView commitAnimations]; 
+
+	
+}
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+	printf("begin in view controller\n");
+	
+}
+
+
+- (UIView *)viewForZoomingInScrollView:(UIScrollView *)scrollView1{
+	CGSize s = scrollView1.contentSize;
+	//printf("w: %f, h: %f\n",s.width,s.height);
+	//printf("w: %f, h: %f\n",s.width/self.view.frame.size.height,s.height/self.view.frame.size.width);
+
+	float zoomScale = (s.height/320.0 + s.width/480.0) /2.0;
+	
+	printf("scrollview : %f\n",zoomScale);
+	
+//	for(MarkerView * m in path.dataPoints){
+//		m.frame = CGRectMake((m.location.x)*zoomScale - m.frame.size.width/2, (m.location.y )*zoomScale - m.frame.size.height, m.frame.size.width, m.frame.size.height);
+//	}
+	
+//	for(MarkerView * m in pinArray){
+//		m.frame = CGRectMake((m.location.x)*zoomScale - m.frame.size.width/2, (m.location.y )*zoomScale - m.frame.size.height, m.frame.size.width, m.frame.size.height);
+//	}
+	//}
+	//float z = [scrollView1 z;
+
+	return mapBackground;
+}
+
+- (void)scrollViewDidZoom:(UIScrollView *)scrollView {
+	
+}
+
+- (void)scrollViewWillBeginZooming:(UIScrollView *)scrollView1 withView:(UIView *)view {
+	printf("Will Begin Zoom\n");
+	
+}
+
+- (void)scrollViewDidEndZooming:(UIScrollView *)scrollView1 withView:(UIView *)view atScale:(float)scale {
+	printf("Did End Zoom %f\n", scrollView1.zoomScale);
+
+	float zoomScale = scrollView1.zoomScale;
+	
+	if(zoomScale > FIRST_LEVEL_ZOOM){
+		for(MarkerView * m in pinArray){
+			if(m.alpha == 0.0){
+			if(m.type == TYPE_OTHER){
+				m.frame = CGRectMake((m.location.x)*zoomScale - m.frame.size.width/2, (m.location.y )*zoomScale - m.frame.size.height - 40, m.frame.size.width, m.frame.size.height);
+
+				[UIView beginAnimations:nil context:nil]; // begins animation block
+				[UIView setAnimationDuration:0.3];        // sets animation duration
+				[UIView setAnimationDelegate:self];        // sets delegate for this block
+				//[UIView setAnimationDidStopSelector:@selector(animationFinished:finished:context:)];
+				m.alpha = 1.0;
+				m.frame = CGRectMake((m.location.x)*zoomScale - m.frame.size.width/2, (m.location.y )*zoomScale - m.frame.size.height, m.frame.size.width, m.frame.size.height);
+
+				[UIView commitAnimations];
+				
+			}
+		}
+		}
+	}
+	
+	//[mapBackground setNeedsDisplay];
+	if(scale < FIRST_LEVEL_ZOOM){
+		for(MarkerView * m in pinArray){
+			if(m.type == TYPE_OTHER){
+				[UIView beginAnimations:nil context:nil]; // begins animation block
+				[UIView setAnimationDuration:0.3];        // sets animation duration
+				[UIView setAnimationDelegate:self];        // sets delegate for this block
+				//[UIView setAnimationDidStopSelector:@selector(animationFinished:finished:context:)];
+				m.alpha = 0.0;
+				[UIView commitAnimations];
+				
+				//m.frame = CGRectMake((m.location.x)*zoomScale - m.frame.size.width/2, (m.location.y )*zoomScale - m.frame.size.height, m.frame.size.width, m.frame.size.height);
+			}
+		}
+	}
+	else {
+		//scrollView.zoomedIn = YES;
+	}
+	
+	
+	if (scale == 1.0){
+		scrollView.zoomedIn = NO;
+	}
+}
+
+-(void) setTracks:(NSMutableArray *) trackNames {
+	
+	int tracks = [trackNames count];
+	float gradientWidth = 320.0 / (tracks * 6);
+	float trackAlpha = 0.95;
+	float trackHeight = (320 - (gradientWidth*(tracks - 1)))/(float)tracks;
+		
+	NSMutableArray * colors = [[NSMutableArray alloc] init];
+	
+	for(int i = 0; i < tracks; i ++){
+		[colors addObject:[UIColor colorWithRed:0.1 green:0.1 blue:(float)i/(float)tracks alpha:1.0]];
+	}
+
+	CGRect trackRect;
+	GradientView * trackView;
+	
+	for(int i = 0; i < tracks; i++){
+		if (i == 0) {
+			trackRect = CGRectMake(0, 0, 480, trackHeight + gradientWidth);
+			trackView = [[GradientView alloc] initWithFrame:trackRect];
+			trackView.gradientType = kGradientTypeTop;
+			trackView.gradientHeight = gradientWidth;
+			trackView.startColor = [colors objectAtIndex:i];
+			trackView.backgroundColor = [UIColor clearColor];
+			trackView.alpha = trackAlpha;
+
+		}
+		else {
+			trackRect = CGRectMake(0, trackHeight + (i-1)*(trackHeight + gradientWidth), 480, trackHeight + gradientWidth*2);
+			trackView = [[GradientView alloc] initWithFrame:trackRect];
+			trackView.gradientType = kGradientTypeMiddle;
+			trackView.gradientHeight = gradientWidth;
+			trackView.startColor = [colors objectAtIndex:i];
+			trackView.backgroundColor = [UIColor clearColor];
+			trackView.alpha = trackAlpha;
+			
+
+		}
+		
+		
+		
+		[mapBackground addSubview:trackView];
+		UILabel * trackLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, trackRect.origin.y + gradientWidth, trackHeight, trackHeight)];
+		trackLabel.text = [trackNames objectAtIndex:i];
+		trackLabel.textColor = [UIColor whiteColor];
+		trackLabel.backgroundColor = [UIColor clearColor];
+		[mapBackground addSubview:trackLabel];
+		
+		
+		[trackView setNeedsDisplay];
+		
+		[trackView release];
+		[trackLabel release];
+		
+	}
+	
+	
+
+	
+	
+	//path.coefficients = [Matrix fitPolyToPointsX:x andY:y];
+	
+	
+	//UIToolbar * sidebar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 0, 320, 20)];
+	//sidebar.transform = CGAffineTransformMakeRotation(M_PI / 2);
+	//sidebar.frame = CGRectMake(0, 0, 30, 320);
+	
+	//UIBarButtonItem * b = [[UIBarButtonItem alloc] initWithTitle:@"Sidebar" style:UIBarButtonItemStylePlain target:scrollView action:@selector(barCallback)];
+	//sidebar.items = [NSArray arrayWithObjects:b, nil];
+	//[mapBackground addSubview:sidebar];
+	
+	//[sidebar release];
+	
+	
+	[colors release];
+	
+}
+
+-(void) startTimer {
+	myTimer = [NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(updatePosition) userInfo:nil repeats:YES];// init timer to call onTime function once per second
+	[backgroundView start];
+
+}
+
+-(void) stopTimer {
+	if(myTimer){
+	if([myTimer isValid])
+		[myTimer invalidate];
+	}
+	
+	[backgroundView stop];
+
+}
+
+
+-(void) setTheDataArray:(MusicPiece *) piece {
+	
+	self.dataArray = piece;
+	//printf("Setting Data array\n");
+	Track * structureTrack = nil;
+	for( Track * t in piece.tracks){
+		if([t.name isEqualToString:@"Structure"]){
+			structureTrack = t;
+			break;
+		}
+	}
+	
+	if(!structureTrack){
+		return;
+	}
+	
+	NSMutableArray * tempDataPageArray = [[NSMutableArray alloc] init];
+	
+	for(DataPage * d in structureTrack.pages){
+		if(![piece.structureArray containsObject:[d text]]){
+			[piece.structureArray addObject:[d text]];
+			[tempDataPageArray addObject: d];
+		}
+	}
+	
+//	if([piece.structureArray count] > 1)
+//		[self setTracks: piece.structureArray];
+	
+	
+	int startXPixel = 20;
+	int endXPixel = 460;
+	
+	int numMarkers = [structureTrack.pages count];
+
+	float gradientWidth = 320.0 / ([piece.structureArray count] * 6);
+	float trackHeight = (320 - (gradientWidth*([piece.structureArray count] - 1)))/(float)[piece.structureArray count];
+	
+	
+	path = [[PathView alloc] initWithFrame:CGRectMake(0, 0, 480, 320)];
+	path.backgroundColor = [UIColor clearColor];
+	[mapBackground addSubview:path];
+	NSMutableArray * tempPinArrray = [[NSMutableArray alloc] initWithCapacity:numMarkers];
+		
+	float markerSize = 30;
+	
+	for(int i=0; i<numMarkers; i ++){
+		
+		float maxTime = ((DataPage *)[structureTrack.pages objectAtIndex:[structureTrack.pages count]-1]).time;
+
+		//CGFloat randHeight = 120 * (CGFloat)arc4random()/(CGFloat)RAND_MAX  + 20;
+		//CGFloat randHeight = locs[i]*(trackHeight + gradientWidth);
+		//CGFloat xLocation = i*(frame.size.height - 40)/(float)numMarkers + 40;
+		
+		DataPage * d = [structureTrack.pages objectAtIndex:i];
+		CGFloat xLocation = startXPixel + ( d.time/maxTime )*(endXPixel - startXPixel) ;
+		CGFloat yLocation = (trackHeight + gradientWidth) * [piece.structureArray indexOfObject:[d text] ] + trackHeight/2.0;
+		
+		MarkerView * marker = [[MarkerView alloc] initWithFrame:CGRectMake(xLocation, yLocation - 40, markerSize, markerSize)];
+		if(i == 0)
+			[marker addImage:[UIImage imageNamed:@"green_noshaddow.png"]];
+		else if( i == numMarkers -1)
+			[marker addImage:[UIImage imageNamed:@"purple_noshaddow.png"]];
+		else
+			[marker addImage:[UIImage imageNamed:@"red_noshaddow.png"]];
+		
+		marker.time = d.time;
+		marker.frame = CGRectMake(xLocation, yLocation - 40, marker.frame.size.width, marker.frame.size.height);
+		marker.location = CGPointMake(xLocation + marker.frame.size.width/2, yLocation);
+		marker.alpha = 0.0;
+		marker.type = TYPE_STRUCTURE;
+
+		[tempPinArrray addObject:marker];
+		[pinArray addObject:marker];
+		
+		[scrollView addSubview:marker];
+		
+		//PageViewTemp * page = [[PageViewTemp alloc] initWithFrame:CGRectMake(0, 0, 480, 320)];
+//		PageViewController * page = [[PageViewController alloc] initWithTrack:nil];
+//		[page setDataPage:(DataPage *)[((Track *)[piece.tracks objectAtIndex:0]).pages objectAtIndex:0]];
+//		
+//		page.view.transform = CGAffineTransformMakeScale(1.0 / ZOOM_IN_AMOUNT, 1.0 / ZOOM_IN_AMOUNT);
+//		page.view.center = CGPointMake(marker.location.x + marker.frame.size.width/2, marker.frame.size.height/2 + marker.location.y);
+//		page.view.alpha = 0;
+//		[mapBackground addSubview:page.view];
+//		
+//		marker.page = page;
+//		//marker.pageRect
+//		
+////		marker.alpha = 0.0f;
+//		marker.dataPage = (DataPage *)[((Track *)[piece.tracks objectAtIndex:0]).pages objectAtIndex:0];
+//		marker.pageRect = page.view.frame;
+//		
+//		[marker release];
+//		[page release];
+
+		
+	}
+	path.alpha = 1.0;
+	path.dataPoints = tempPinArrray;
+	if(numMarkers > 1)
+		[path calculatePath];
+	[path setNeedsDisplay];
+	
+	//[pinArray addObject:tempPinArrray];
+	
+	[tempPinArrray release];
+	
+	// For playback for now
+	if(numMarkers < 2){
+		timeLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 400, 50)];
+		//timeLabel.center = CGPointMake(320/4, 480/2);
+		timeLabel.backgroundColor = [UIColor clearColor];
+		timeLabel.textColor = [UIColor whiteColor];
+		timeLabel.text = @"Tap screen for options";
+		[self.view addSubview:timeLabel];
+		mode = PLAY;
+	}
+	else{
+		mode = MAP;
+		
+//		float maxTime = ((DataPage *)[structureTrack.pages objectAtIndex:[structureTrack.pages count]-1]).time;
+//
+//		PageViewController * pageV = [[PageViewController alloc] initWithTrack:nil];
+//		scrollView.thePageViewController = pageV;
+//		scrollView.thePageViewController.view.alpha = 0;
+//		
+//		[mapBackground addSubview:scrollView.thePageViewController.view];
+//		
+//		[pageV release];
+//		
+//		NSString * pictureString;
+//		for( Track * t in piece.tracks ){
+//			if([t.name isEqualToString:@"In the Moment"]){
+//				pictureString = @"purple_noshaddow.png";
+//			}
+//			else if([t.name isEqualToString:@"Behind the Music"]){
+//				pictureString = @"green_noshaddow.png";
+//			}
+//			else{
+//				continue;
+//			}
+//			for( DataPage * d in t.pages ){
+//				CGFloat randNum = (CGFloat)arc4random()/(CGFloat)RAND_MAX;
+//				CGFloat yLocation = (30 * randNum + 10) * powf(-1, (randNum > 0.5 ? 0 : 1));
+//				CGFloat xLocation = startXPixel + ( d.time/maxTime )*(endXPixel - startXPixel) ;
+//				//CGFloat yLocation = (trackHeight + gradientWidth) * [piece.structureArray indexOfObject:[d text] ] + trackHeight/2.0;
+//				
+//				MarkerView * marker = [[MarkerView alloc] initWithFrame:CGRectMake(xLocation, yLocation - 40, markerSize, markerSize)];
+//
+//				[marker addImage:[UIImage imageNamed:pictureString]];
+//				
+//				marker.time = d.time;
+//				int ind = [path closestTime: marker.time];
+//				PathPoint * closest = [path.drawingPoints objectAtIndex:ind];
+//				marker.frame = CGRectMake(closest.x, closest.y + yLocation - 40 , marker.frame.size.width, marker.frame.size.height);
+//				marker.location = CGPointMake(closest.x, marker.frame.origin.y + 40);
+//				marker.alpha = 0.0;
+//				marker.dataPage = d;
+//				marker.type = TYPE_OTHER;
+//				//[tempPinArrray addObject:marker];
+//				[pinArray addObject:marker];
+//
+//				[scrollView addSubview:marker];
+//				
+//				//PageViewTemp * page = [[PageViewTemp alloc] initWithFrame:CGRectMake(0, 0, 480, 320)];
+////				PageViewController * page = [[PageViewController alloc] initWithTrack:nil];
+////				[page setDataPage:d];
+////				
+////				page.view.transform = CGAffineTransformMakeScale(1.0 / ZOOM_IN_AMOUNT, 1.0 / ZOOM_IN_AMOUNT);
+////				page.view.center = CGPointMake(marker.location.x + marker.frame.size.width/2, marker.frame.size.height/2 + marker.location.y);
+////				page.view.alpha = 0;
+////				[mapBackground addSubview:page.view];
+////				
+////				marker.page = page;
+////				//marker.pageRect
+////				
+////				//		marker.alpha = 0.0f;
+////				marker.dataPage = d;
+////				marker.pageRect = page.view.frame;
+//				
+//
+//				[marker release];
+////				[page release];
+//			}
+//			
+//			
+//		}
+		
+	}
+	
+	
+}
+
+- (void) zoomOut {
+	[scrollView zoomToRect:CGRectMake(0, 0, 480, 320) animated:YES];
+}
+
+/*
+ // Implement loadView to create a view hierarchy programmatically, without using a nib.
+ - (void)loadView {
+ }
+ */
+
+-(void) fadeInPath {	
+	if (path){
+		[UIView beginAnimations:nil context:nil]; // begins animation block
+		[UIView setAnimationDuration:0.3];        // sets animation duration
+		[UIView setAnimationDelegate:self];        // sets delegate for this block
+		[UIView setAnimationDidStopSelector:@selector(animationFinished:finished:context:)];
+		path.alpha = 1.0;
+		[UIView commitAnimations]; 
+	}
+	
+}
+
+// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
+-(void) animationFinished:(NSString *)animationID finished:(BOOL)finished context:(void *)context{   //[super viewDidLoad];
+	//NSMutableArray * a = (NSMutableArray *)context;
+	double delay = 0.0;
+	for(MarkerView * m in pinArray){
+		if(m.type == TYPE_STRUCTURE){
+		[self performSelector:@selector(slideinMarker:) withObject:m afterDelay:delay];
+		delay += 0.05;
+		}
+	}
+	
+}
+
+- (void) slideinMarker:(MarkerView *) m {
+	[UIView beginAnimations:nil context:nil]; // begins animation block
+	[UIView setAnimationDuration:0.5];        // sets animation duration
+	[UIView setAnimationDelegate:self];        // sets delegate for this block
+	//[UIView setAnimationDelay:UIViewAnimationCurv];
+	//m.alpha = 1.0;
+	m.frame = CGRectMake(m.location.x - m.frame.size.width/2, 
+						 m.location.y - m.frame.size.height, m.frame.size.width, m.frame.size.height);
+	[UIView commitAnimations]; 
+}
+
+
+// Override to allow orientations other than the default portrait orientation.
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    // Return YES for supported orientations
+    return (interfaceOrientation == UIInterfaceOrientationLandscapeLeft || interfaceOrientation == UIInterfaceOrientationLandscapeRight);
+}
+
+
+- (void)didReceiveMemoryWarning {
+	// Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+	
+	// Release any cached data, images, etc that aren't in use.
+}
+
+- (void)viewDidUnload {
+	// Release any retained subviews of the main view.
+	// e.g. self.myOutlet = nil;
+}
+
+
+- (void)dealloc {
+    [super dealloc];
+}
+
+
+@end

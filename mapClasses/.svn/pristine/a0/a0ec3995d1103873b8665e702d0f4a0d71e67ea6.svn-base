@@ -1,0 +1,38 @@
+//
+//  PathView.h
+//  MapDemo
+//
+//  Created by Administrator on 4/13/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "MarkerView.h"
+#import "PathPoint.h"
+#import "CursorView.h"
+
+@interface PathView : UIView {
+	NSMutableArray *  coefficients;
+	NSMutableArray *  dataPoints;
+	NSMutableArray* randomPoints;
+	NSMutableArray* randomPointFlags;
+	
+	float previousTime;
+	
+	float cursorTime;
+	
+	NSMutableArray * drawingPoints;
+	
+	CursorView * cursor;
+}
+
+-(int) closestTime:(float)t ;
+
+@property (nonatomic, assign) float cursorTime;
+@property (nonatomic, retain) NSMutableArray *  coefficients;
+@property (nonatomic, retain) CursorView * cursor;
+
+@property (nonatomic, retain) NSMutableArray *  dataPoints;
+@property ( retain) NSMutableArray *  drawingPoints;
+
+@end

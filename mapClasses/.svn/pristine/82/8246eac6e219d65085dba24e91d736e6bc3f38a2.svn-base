@@ -1,0 +1,102 @@
+//
+//  BackgroundView.m
+//  MapDemo
+//
+//  Created by Administrator on 5/5/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import "BackgroundView.h"
+
+#define BACKGROUND_ANIMATION_TIME 40.0
+
+
+@implementation BackgroundView
+
+
+- (id)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+		self.backgroundColor = [UIColor clearColor];
+        imageArray = [[NSMutableArray alloc] init];
+		currentImage = 0;
+//		UIImageView * backgroundView2 = [[UIImageView alloc] initWithFrame:CGRectMake(0,0, 480*3, 320*3)];
+//		backgroundView2.image = [Utility resizeImage:[UIImage imageNamed:@"background.png"] toSize:backgroundView.frame.size];
+//		[self addSubview:backgroundView2];
+    }
+    return self;
+}
+
+- (void) start {
+	//[NSThread detachNewThreadSelector:@selector(beginAnimation) toTarget:self withObject:nil];
+	[self beginAnimation];
+	timer = [NSTimer scheduledTimerWithTimeInterval:BACKGROUND_ANIMATION_TIME target:self selector:@selector(beginAnimation) userInfo:nil repeats:YES];
+}
+
+- (void) stop {
+	if(timer){
+		if([timer isValid]){
+			[timer invalidate];
+		}
+	}
+}
+
+- (void) beginAnimation {
+	currentImage = currentImage % [imageArray count];
+
+	UIImageView * nextCurrent = [imageArray objectAtIndex: currentImage];
+	nextCurrent.transform = CGAffineTransformConcat(CGAffineTransformMakeRotation(- M_PI / 12.0), CGAffineTransformMakeTranslation(-480*2, -320));
+	nextCurrent.alpha = 0.0;
+	[self addSubview: nextCurrent];
+
+	if(currentImageView){
+		[UIView beginAnimations:nil context:currentImageView]; // begins animation block
+		[UIView setAnimationDuration:1.0];        // sets animation duration
+		[UIView setAnimationDelegate:self];        // sets delegate for this block
+		[UIView setAnimationDidStopSelector:@selector(animationFinished:finished:context:)];
+		currentImageView.alpha = 0.0;
+		nextCurrent.alpha = 1.0;
+		[UIView commitAnimations]; 
+	}
+	else{
+		nextCurrent.alpha = 1.0;
+	}
+	
+	[UIView beginAnimations:nil context:nil]; // begins animation block
+	[UIView setAnimationDuration:BACKGROUND_ANIMATION_TIME];        // sets animation duration
+	[UIView setAnimationDelegate:self];        // sets delegate for this block
+	[UIView setAnimationDidStopSelector:@selector(finishAnimation)];
+	nextCurrent.transform = CGAffineTransformConcat(CGAffineTransformMakeRotation(M_PI / 12.0), CGAffineTransformMakeTranslation(-480, -320));
+	//backgroundView.transform = CGAffineTransformMakeRotation(M_PI / 4.0);
+	//backgroundView.frame = CGRectMake(480/2, 480/2, backgroundView.frame.size.width, backgroundView.frame.size.height);
+	
+	[UIView commitAnimations]; 
+	
+	currentImageView = nextCurrent;
+
+	currentImage++;
+
+}
+
+-(void) addImageView:(UIImageView *)i {
+	[imageArray addObject: i];
+}
+
+- (void) finishAnimation {
+	
+	
+	//[self beginAnimation];
+}
+
+-(void) animationFinished:(NSString *)animationID finished:(BOOL)finished context:(void *)context{   //[super viewDidLoad];
+	UIImageView * iv = (UIImageView *)context;
+	[iv removeFromSuperview];
+	
+	//backgroundView.transform = CGAffineTransformIdentity;
+}
+
+- (void)dealloc {
+    [super dealloc];
+}
+
+
+@end

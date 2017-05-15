@@ -1,0 +1,196 @@
+//
+//  Matrix.m
+//  MapDemo
+//
+//  Created by Administrator on 4/12/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import "Matrix.h"
+
+
+@implementation Matrix
+
+@synthesize rows, cols;
+
+- (id) initWithSize:(int) rows1 cols:(int) cols1
+{
+
+	self = [super init];
+	if (self != nil) {
+		self.rows = rows1;
+		self.cols = cols1;
+		
+		data = (float *)malloc(self.rows*self.cols*sizeof(float));
+		for(int i = 0; i<self.rows; i ++){
+			for(int j=0; j<self.cols; j++){
+				data[i*self.cols + j] = 0.0;
+			}
+		}
+	}
+	return self;
+}
+
+- (void) setValue:(int) row col:(int) col value:(float) value1 {
+	if(row > rows-1 || col > cols-1){
+		printf("out of bounds, row %d col % d", row, col);
+	}
+	else{
+		data[row*self.cols + col] = value1;
+	}
+}
+
+- (float) getValue:(int) row col:(int) col {
+	if(row > rows-1 || col > cols-1){
+		printf("out of bounds, row %d col % d", row, col);
+		return;
+	}
+	else{
+		return data[row*self.cols + col];
+	}
+}
+
+-(Matrix *) transpose {
+	Matrix * t = [[Matrix alloc] initWithSize:self.cols cols:self.rows];
+	for(int i = 0; i<self.rows; i ++){
+		for(int j=0; j<self.cols; j++){
+			[t setValue:j col:i value:[self getValue:i col:j]];
+		}
+	}
+	return t;
+}
+
+- (void) invert  {
+	if (rows <= 0) return;  // sanity check
+	if (rows == 1) return;  // must be of dimension >= 2
+	
+	for (int i=1; i < rows; i++) data[i] /= data[0]; // normalize row 0
+	for (int i=1; i < rows; i++)  { 
+		for (int j=i; j < rows; j++)  { // do a column of L
+			float sum = 0.0;
+			for (int k = 0; k < i; k++)  
+				sum += data[j*cols+k] * data[k*cols+i];
+			data[j*cols+i] -= sum;
+		}
+		if (i == rows-1) continue;
+		for (int j=i+1; j < rows; j++)  {  // do a row of U
+			float sum = 0.0;
+			for (int k = 0; k < i; k++)
+				sum += data[i*cols+k]*data[k*cols+j];
+			data[i*cols+j] = 
+			(data[i*cols+j]-sum) / data[i*cols+i];
+		}
+	}
+	for ( int i = 0; i < rows; i++ )  // invert L
+		for ( int j = i; j < rows; j++ )  {
+			float x = 1.0;
+			if ( i != j ) {
+				x = 0.0;
+				for ( int k = i; k < j; k++ ) 
+					x -= data[j*cols+k]*data[k*cols+i];
+			}
+			data[j*cols+i] = x / data[j*cols+j];
+		}
+	for ( int i = 0; i < rows; i++ )   // invert U
+		for ( int j = i; j < rows; j++ )  {
+			if ( i == j ) continue;
+			float sum = 0.0;
+			for ( int k = i; k < j; k++ )
+				sum += data[k*cols+j]*( (i==k) ? 1.0 : data[i*cols+k] );
+			data[i*cols+j] = -sum;
+		}
+	for ( int i = 0; i < rows; i++ )   // final inversion
+		for ( int j = 0; j < rows; j++ )  {
+			float sum = 0.0;
+			for ( int k = ((i>j)?i:j); k < rows; k++ )  
+				sum += ((j==k)?1.0:data[j*cols+k])*data[k*cols+i];
+			data[j*cols+i] = sum;
+		}
+}
+
++ (Matrix *) multiply:(Matrix *) left withMatrix:(Matrix *) right {
+	if (left.cols != right.rows) {
+		return nil;
+	}
+	
+	Matrix * R = [[Matrix alloc] initWithSize:left.rows cols:right.cols];
+	
+
+	for ( int i = 0; i < right.cols; i++ ){
+		for ( int j = 0; j < left.rows; j++ )  {
+			float sum = 0.0;
+			float leftvalue, rightvalue;
+			for (int c = 0; c < left.cols; c++)  {
+				leftvalue = [left getValue:j col:c];
+				rightvalue = [right getValue:c col:i];
+				sum += leftvalue * rightvalue;
+			}
+			[R setValue:j col:i value:sum];
+		}
+	}
+			 
+	return R;
+
+}
+
+- (void) printMat {
+	printf("\n");
+	for(int i = 0; i<rows; i ++){
+		for(int j=0; j<cols; j++){
+			printf("%f\t",[self getValue:i col:j]);
+		}
+		printf("\n");
+	}
+}
+
++ (NSMutableArray *) fitPolyToPointsX:(NSMutableArray *) x andY:(NSMutableArray *) y{
+	if( [x count] != [y count]){
+		return;
+	}
+	
+	//float * coefficients = (float *) malloc([x count]*sizeof(float));
+	NSMutableArray * coefficients = [[NSMutableArray alloc] init];
+	int order = [x count];
+
+	Matrix * A = [[Matrix alloc] initWithSize:order cols:order];
+	Matrix * b = [[Matrix alloc] initWithSize:order cols:1];
+	
+	Matrix * x1 = [[Matrix alloc] initWithSize:order cols:1];
+	
+	for(int i = 0; i < order; i ++){
+		[b setValue:i col:0 value:[[y objectAtIndex:i] floatValue]];
+		[x1 setValue:i col:0 value:[[x objectAtIndex:i] floatValue]];
+
+		for(int j = order-1; j >= 0; j--){
+			float sum = 1.0;
+			for(int k = 0; k < j; k++){
+				sum *= [[x objectAtIndex:i] floatValue];
+			}
+			[A setValue:i col:j value:sum];
+		}
+	}
+		
+	[A printMat];
+	
+	[b printMat];
+	[x1 printMat];
+
+	[A invert];
+	[A printMat];
+	
+	Matrix * xhat = [Matrix multiply:A withMatrix:b];
+	[xhat printMat];
+	
+	for(int i = 0; i < order; i ++){
+		[coefficients addObject:[NSNumber numberWithFloat:[xhat getValue:i col:0]]];
+	}	
+	
+	return coefficients;
+	
+}
+
+- (void) dealloc {
+	
+}
+
+@end

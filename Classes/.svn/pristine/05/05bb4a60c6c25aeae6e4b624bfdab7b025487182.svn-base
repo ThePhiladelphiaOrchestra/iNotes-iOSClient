@@ -1,0 +1,20 @@
+//
+//  PlaybackControlViewController.h
+//  Test1
+//
+//  Created by Administrator on 1/27/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+
+@interface PlaybackControlViewController : UIViewController {
+	UIImageView * backgroundImage;
+	UIImage * playImage;
+	UIImage * pauseImage;
+	UIButton * playPauseButton;
+
+}
+
+@end

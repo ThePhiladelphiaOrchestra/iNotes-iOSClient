@@ -1,0 +1,33 @@
+//
+//  CaptionView.m
+//  Test1
+//
+//  Created by Administrator on 5/3/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import "CaptionView.h"
+
+
+@implementation CaptionView
+
+
+- (id)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+        // Initialization code
+    }
+    return self;
+}
+
+
+- (void)drawRect:(CGRect)rect {
+    // Drawing code
+}
+
+
+- (void)dealloc {
+    [super dealloc];
+}
+
+
+@end

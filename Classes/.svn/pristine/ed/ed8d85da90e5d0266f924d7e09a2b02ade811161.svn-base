@@ -1,0 +1,58 @@
+//
+//  GlossaryTableViewCell.m
+//  Untitled
+//
+//  Created by Administrator on 2/2/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import "GlossaryTableViewCell.h"
+
+
+@implementation GlossaryTableViewCell
+
+@synthesize glossaryItem;
+
+- (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier {
+    if (self = [super initWithStyle:style reuseIdentifier:reuseIdentifier]) {
+		label = [[UILabel alloc] initWithFrame:CGRectMake(10, 10, 200, 30)];
+		label.backgroundColor = [UIColor clearColor];
+		label.font = [UIFont boldSystemFontOfSize:20];
+		
+		[self.contentView addSubview:label];
+    }
+    return self;
+}
+
+-(void) setGlossaryItem:(GlossaryItem *)theItem {
+	label.text = theItem.name;
+	
+}
+
+- (void)setSelected:(BOOL)selected animated:(BOOL)animated {
+
+    [super setSelected:selected animated:animated];
+	label.textColor = (selected ? [UIColor whiteColor] : [UIColor blackColor]);
+    // Configure the view for the selected state
+}
+
+//- (void)layoutSubviews {
+//	[super layoutSubviews];
+//	
+//	// determine the content rect for the cell. This will change depending on the
+//	// style of table (grouped vs plain)
+//	CGRect contentRect = self.contentView.bounds;
+//	
+//	// position the elment name in the content rect
+//	CGRect labelRect = contentRect;
+//	labelRect.origin.x = labelRect.origin.x+56;
+//	labelRect.origin.y = labelRect.origin.y+3;
+//	labelView.frame = labelRect;	
+//}
+
+- (void)dealloc {
+    [super dealloc];
+}
+
+
+@end

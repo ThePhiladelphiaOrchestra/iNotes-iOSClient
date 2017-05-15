@@ -1,0 +1,48 @@
+//
+//  PageViewController.h
+//  Test1
+//
+//  Created by Administrator on 1/4/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "Track.h"
+#import "DataPage.h"
+#import "GlossaryViewController.h"
+#import "PageView.h"
+#import "WebOverlayView.h"
+
+@interface PageViewController : UIViewController 
+{
+	NSInteger pageIndex;
+	BOOL textViewNeedsUpdate;
+
+	UIImageView *imageView;
+	UILabel * measureLabel;
+	UILabel * timeLabel;
+
+	UITextView *textView;
+	
+	Track * trackData;
+	BOOL didScroll;
+
+	NSMutableArray * dataPages;
+	
+	UIWebView * webView;
+	GlossaryViewController * tempGloss;
+	
+	WebOverlayView * overLay;
+	
+	PageView * pageView;
+	
+
+	UIActivityIndicatorView * progressInd;
+}
+
+@property (assign) NSInteger pageIndex;
+@property (assign) BOOL didScroll;
+
+- (void)updateTextViews:(BOOL)force;
+
+@end

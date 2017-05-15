@@ -1,0 +1,89 @@
+//
+//  NavigationViewController.h
+//  Test1
+//
+//  Created by Administrator on 11/17/09.
+//  Copyright 2009 Drexel University. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import <CoreFoundation/CoreFoundation.h>
+#import <CoreGraphics/CGColor.h>
+#import <CoreGraphics/CoreGraphics.h>
+#import <CoreGraphics/CGGeometry.h>
+#import <UIKit/UIKit.h>
+#import <UIKit/UIControl.h>
+#import <QuartzCore/CAAnimation.h>
+
+#import "Track.h"
+#import "PageViewController.h"
+#import "PlaybackControlViewController.h"
+#import "MapToolBar.h"
+
+#define HORIZ_SWIPE_DRAG_MIN  12
+#define VERT_SWIPE_DRAG_MAX    4
+
+#define HORIZ_SWIPE_DRAG_MAX   4
+#define VERT_SWIPE_DRAG_MIN   12
+
+@interface NavigationViewController : UIViewController {
+
+	NSMutableArray * pageViewControllerArray;
+	UIScrollView *scrollView;
+	UIPageControl *pageControl;
+	
+	PageViewController * previousPage;
+	PageViewController *currentPage;
+	PageViewController *nextPage;
+	
+	
+	UITabBar *tabBar;	
+	UIImageView *imageView;
+	UIImageView *pointerImageView;
+
+	CGPoint startTouchPosition;
+	UILabel * measureLabel;
+	UILabel * slideLabel;
+	UIButton * stopBlinkingButton;
+	UITextView *textView;
+	
+	UIImageView * leftArrow;
+	UIImageView * rightArrow;
+
+	UIImageView * measureMarkerImageView;
+	
+	int pagePosistion;
+
+	NSTimer * myTimer;
+	UIButton  * liveButton;
+	
+	Track * trackData;
+	
+	UISlider * slider;
+	
+	BOOL animating;
+	BOOL userInterjected;
+
+	NSTimer * timer;
+	
+	UILabel * sliderMarkerText;
+	UILabel * pointerText;
+	
+    BOOL pageControlIsChangingPage;
+
+	MapToolBar * toolBar;
+	BOOL contentLoaded;
+	
+	BOOL loadedTickmarkers;
+
+}
+
+-(void) goToPage:(NSInteger) measure animated:(BOOL) animated;
+
+@property (nonatomic, retain) NSTimer *myTimer;
+@property (assign) int pagePosistion;
+
+@property (nonatomic, retain) Track * trackData;
+@property (assign) BOOL contentLoaded;
+
+@end

@@ -1,0 +1,43 @@
+//
+//  PageView.m
+//  MapDemo
+//
+//  Created by Administrator on 4/6/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import "PageViewTemp.h"
+
+
+@implementation PageViewTemp
+
+
+- (id)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+        UITextView * text = [[UITextView alloc] initWithFrame:frame];
+		text.userInteractionEnabled = NO;
+		text.text = @"Test text";
+		
+		[self addSubview: text];
+		[text release];
+		
+		self.backgroundColor = [UIColor blackColor];
+    }
+    return self;
+}
+
+
+- (void)drawRect:(CGRect)rect {
+    // Drawing code
+}
+
+
+- (void)dealloc {
+    [super dealloc];
+}
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+	printf("begin in Page\n");
+	
+}
+@end

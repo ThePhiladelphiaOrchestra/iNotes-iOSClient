@@ -1,0 +1,72 @@
+//
+//  CursorView.m
+//  MapDemo
+//
+//  Created by Administrator on 4/19/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import "CursorView.h"
+
+
+@implementation CursorView
+
+int increment = 0;
+
+- (id)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+        duration = 25;
+		self.backgroundColor = [UIColor clearColor];
+		UIImageView * image = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"marker.png"]];
+		image.center = CGPointMake(frame.size.width/2, frame.size.height/2);
+		image.alpha = 1.0f;
+		[self addSubview:image];
+		
+		[image release];
+		
+		[self start];
+    }
+    return self;
+}
+
+-(void) start {
+	[NSTimer scheduledTimerWithTimeInterval:1.0/(float)duration target:self selector:@selector(setNeedsDisplay) userInfo:nil repeats:YES];
+}
+
+- (void)drawRect:(CGRect)rect {
+	
+	increment = increment % (duration-1);
+	
+    float width = self.frame.size.width * (float)increment/(float)duration;
+	CGRect circRect = CGRectMake( (self.frame.size.width - width)/2.0, (self.frame.size.width - width)/2.0, width, width);
+	
+	CGContextRef context    = UIGraphicsGetCurrentContext();
+
+	float alphaVlaue = 0.0;
+	if(increment < (float)duration / 2){
+		alphaVlaue = 1.0;
+	}
+	else{
+		alphaVlaue = 1.0 - 2*((float)increment - duration/2.0)/(float)duration;
+	}
+	CGContextSetRGBStrokeColor(context, 1.0, 0.0, 0.0, alphaVlaue);
+	
+//	CGBitmapContextCreateImage(context);
+	
+	CGContextStrokeEllipseInRect(context, circRect);
+	
+//	UIGraphicsBeginImageContext(self.frame.size);
+//	UIImage * im = [UIImage imageNamed:@"marker.png"];
+//	CGContextDrawImage(context, self.frame, im.CGImage);
+
+	
+	increment ++;
+}
+
+
+- (void)dealloc {
+    [super dealloc];
+}
+
+
+@end

@@ -1,0 +1,19 @@
+//
+//  BulletView.h
+//  MapDemo
+//
+//  Created by Administrator on 4/26/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+typedef enum {
+	B1
+} BulletLevel;
+
+@interface BulletView : UIView {
+
+}
+
+@end

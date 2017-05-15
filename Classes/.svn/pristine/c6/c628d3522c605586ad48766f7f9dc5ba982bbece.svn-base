@@ -1,0 +1,29 @@
+//
+//  GlossaryViewController.h
+//  Untitled
+//
+//  Created by Administrator on 2/2/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "GlossaryDataSource.h"
+#import "GlossaryItemView.h"
+
+@interface GlossaryViewController : UIViewController <UITableViewDelegate> {
+	UITableView *tableView;
+	GlossaryDataSource * dataSource1;
+	
+	GlossaryItemView * glossaryView;
+	
+	UIScrollView * scrollView;
+	
+	UIImageView * dividerBar;
+	UIImage * dividerUnselectedImage;
+	UIImage * dividerSelectedImage;
+
+	CGPoint startTouchPosition;
+}
+
+@property (nonatomic, retain) GlossaryDataSource * dataSource1;
+@end

@@ -1,0 +1,74 @@
+//
+//  SplashViewController.h
+//  iTennis
+//
+//  Created by Brandon Trebitowski on 3/18/09.
+//  Copyright 2009 __MyCompanyName__. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "MainViewController.h"
+#import "NavigationViewController.h"
+#import "NotesViewController.h"
+#import "InstructionsViewController.h"
+#import "TrackControlView.h"
+
+@interface SplashViewController : UIViewController <UINavigationControllerDelegate> {
+	NSTimer *timer;
+	NSTimer *timer2;
+
+	UINavigationController *navigationController1;
+
+	UIImageView *splashImageView;
+	UIImageView *loadingContentImageView;
+	UIImageView *chooseModeImageView;
+	UIImageView *chooseAppVersionImageView;
+	UIButton * liveButton;
+	
+	MainViewController *mainViewController;
+	NavigationViewController *navigationViewController;
+	InstructionsViewController *instructViewController;
+
+
+	
+	UILabel *measureLabel;
+	UILabel *statusLabel;
+
+	UIImageView* networkImage;
+	UIImage* networkReachableImage;
+	UIImage* networkNotReachableImage;
+	
+	UIToolbar *bar;
+	UIProgressView * downloadProgress;
+	
+	
+	UIPickerView * piecePicker;
+
+	UIBarButtonItem *pieceBarItem;
+
+	UIBarButtonItem * connectedItem;
+	BOOL toolbarVisible;
+
+
+	NSMutableArray * currentViewControllers;
+}
+
+@property(nonatomic,retain) NSTimer *timer;
+@property(nonatomic,retain) NSTimer *timer2;
+
+@property(nonatomic,retain) UIImageView *splashImageView;
+@property(nonatomic,retain) UIImageView *loadingContentImageView;
+@property(nonatomic,retain) UIImageView *chooseModeImageView;
+
+@property(retain) MainViewController *mainViewController;
+@property(retain) NavigationViewController *navigationViewController;
+@property(retain) InstructionsViewController *instructViewController;
+@property(retain) UITabBarController *trackTabBar;
+@property(retain) UIToolbar *bar;
+@property(retain) 	UIBarButtonItem *pieceBarItem;
+@property(retain) 	UIBarButtonItem *connectedItem;
+@property(assign) BOOL toolbarVisible;
+
+@property(retain) UINavigationController *navigationController1;
+
+@end

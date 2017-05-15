@@ -1,0 +1,40 @@
+//
+//  DataPage.h
+//  Test1
+//
+//  Created by Administrator on 11/18/09.
+//  Copyright 2009 Drexel University. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+typedef enum {
+	TEXT_ONLY, TEXT_AND_PICTURE, PICTURE_ONLY
+} HTMLTemplate;
+
+@interface DataPage : NSObject {
+
+	int measure;
+	NSString * text;
+	double time;
+	
+	HTMLTemplate html;
+	
+	NSArray * images;
+	
+	NSString * structure;
+	
+	NSString * parentTrack;
+}
+
+@property (assign) int measure;
+@property (assign) double time;
+@property (assign) HTMLTemplate html;
+
+@property (retain) NSString * text;
+@property (retain) NSString * structure;
+@property (retain) NSString * parentTrack;
+
+@property (retain) NSArray * images;
+
+@end

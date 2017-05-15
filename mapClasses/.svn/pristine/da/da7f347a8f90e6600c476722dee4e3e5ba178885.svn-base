@@ -1,0 +1,16 @@
+//
+//  CursorView.h
+//  MapDemo
+//
+//  Created by Administrator on 4/19/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "CursorView.h"
+
+@interface CursorView : UIView {
+	int duration;
+}
+
+@end

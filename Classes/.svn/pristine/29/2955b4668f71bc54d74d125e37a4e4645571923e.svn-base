@@ -1,0 +1,164 @@
+//
+//  InstructionsViewController.m
+//  Test1
+//
+//  Created by Administrator on 12/18/09.
+//  Copyright 2009 Drexel University. All rights reserved.
+//
+
+#import "InstructionsViewController.h"
+#import "Test1AppDelegate.h"
+
+@implementation InstructionsViewController
+
+/*
+ // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
+        // Custom initialization
+    }
+    return self;
+}
+*/
+
+
+// Implement loadView to create a view hierarchy programmatically, without using a nib.
+- (void)loadView {
+	// Init the view
+	CGRect appFrame = [[UIScreen mainScreen] applicationFrame];
+	UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 30, 480, 300)];
+	//view.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+	self.view = view;
+	[view release];	
+	
+	UIImageView * backGroundImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"oldpaper.jpg"]];
+	backGroundImageView.transform = CGAffineTransformMakeRotation(M_PI / 2.0);
+	//	backGroundImageView.frame = CGRectMake(-20, -50, appFrame.size.height + 50, appFrame.size.width + 55);
+	backGroundImageView.frame = CGRectMake(0,0,480,320);
+	
+	//[self.view addSubview:backGroundImageView];
+	[self.view setBackgroundColor:[UIColor darkGrayColor]];
+	
+	[backGroundImageView release];
+	
+	UIScrollView *myScrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, 480, 320)];
+	[myScrollView setContentSize:CGSizeMake(480, 1000)];
+	myScrollView.backgroundColor = [UIColor clearColor];
+	
+	UITextView * swipeTextView = [[UITextView alloc] initWithFrame:CGRectMake(10, 30, 480,1000)];
+	[swipeTextView setUserInteractionEnabled:FALSE];
+	[swipeTextView setFont:[UIFont fontWithName:@"Arial" size:19]];
+	[swipeTextView setText:@"Once you've chosen a track to view, swipe your finger from right to left to turn the page, or the opposite way to return to the previous page."];
+	[swipeTextView setBackgroundColor:[UIColor clearColor]];
+	swipeTextView.textColor = [UIColor whiteColor];
+	[myScrollView addSubview:swipeTextView];
+	[swipeTextView release];
+	
+	ipField = [[UITextField alloc] initWithFrame:CGRectMake(0,0, 170, 30)];
+	ipField.center = CGPointMake(appFrame.size.height/2, 175);
+	ipField.borderStyle = UITextBorderStyleBezel;
+	ipField.textColor = [UIColor blackColor];
+	ipField.font = [UIFont systemFontOfSize:17.0];
+	ipField.placeholder = @"<enter address>";
+	ipField.backgroundColor = [UIColor whiteColor];
+	ipField.keyboardType = UIKeyboardTypeURL;
+	ipField.returnKeyType = UIReturnKeyDone;		
+	ipField.clearButtonMode = UITextFieldViewModeWhileEditing;	// has a clear 'x' button to the right
+	ipField.delegate = self;	// let us be the delegate so we know when the keyboard's "Done" button is pressed
+	
+	[myScrollView addSubview:ipField];
+	
+	UIImageView* swipeImage = [[UIImageView alloc] initWithFrame:CGRectMake(0,0, 170, 200)];
+	//[im setTransform:CGAffineTransformMakeRotation(angle)];
+	swipeImage.center = CGPointMake(480/2, 175);
+	NSMutableArray * imageArray = [[NSMutableArray alloc] init];
+	
+	swipeImage.animationDuration = 2.0;
+	swipeImage.animationRepeatCount = 0;
+	
+	int numImages = 14;
+	for (int i=0; i<=numImages; i++) {
+		UIImage * image = [UIImage imageNamed:[NSString stringWithFormat:@"finger%d.png",i]];
+		[imageArray addObject:image];
+		[image release];
+	}
+	
+	for (int i =0; i<numImages; i++) {
+		[imageArray addObject:[UIImage imageNamed:[NSString stringWithFormat:@"finger%d.png",numImages]]];
+	}
+	
+	swipeImage.animationImages = imageArray;
+	[swipeImage startAnimating];
+	//[myScrollView addSubview:swipeImage];
+	
+	[swipeImage release];
+	[imageArray release];
+	
+	UITextView * tapTextView = [[UITextView alloc] initWithFrame:CGRectMake(10, 300, 480,1000)];
+	[tapTextView setUserInteractionEnabled:FALSE];
+	[tapTextView setFont:[UIFont fontWithName:@"Arial" size:19]];
+	[tapTextView setText:@"To choose a different track, lightly tap the screen to view the menu of tracks to select from."];
+	[tapTextView setBackgroundColor:[UIColor clearColor]];
+	tapTextView.textColor = [UIColor whiteColor];
+	[myScrollView addSubview:tapTextView];
+	[tapTextView release];
+	
+	[self.view addSubview:myScrollView];
+	[myScrollView release];
+	
+	
+}
+
+
+
+// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
+- (void)viewDidLoad {
+    [super viewDidLoad];
+	
+	Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+	NSString * newString = appDelegate.SERVER_ADDRESS;
+	if(newString && ![newString isEqualToString:@"(null)"])
+		ipField.text = newString;
+	else{
+		ipField.text = appDelegate.DEFAULT_SERVER_ADDRESS;
+	}
+}
+
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+	Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+	appDelegate.SERVER_ADDRESS = ipField.text;
+	
+	NSUserDefaults * defaults = [NSUserDefaults standardUserDefaults];
+	[defaults setObject:ipField.text forKey:@"serverAddress"];
+	
+	[textField resignFirstResponder];
+	return YES;
+}
+
+// Override to allow orientations other than the default portrait orientation.
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    // Return YES for supported orientations
+    return (interfaceOrientation == UIInterfaceOrientationLandscapeLeft);
+}
+
+
+- (void)didReceiveMemoryWarning {
+	// Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+	
+	// Release any cached data, images, etc that aren't in use.
+}
+
+- (void)viewDidUnload {
+	// Release any retained subviews of the main view.
+	// e.g. self.myOutlet = nil;
+}
+
+
+- (void)dealloc {
+    [super dealloc];
+}
+
+
+@end

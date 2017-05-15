@@ -1,0 +1,23 @@
+//
+//  MapDemoAppDelegate.h
+//  MapDemo
+//
+//  Created by Administrator on 4/5/10.
+//  Copyright Drexel University 2010. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "MapViewController.h"
+#import "MapScrollContainerViewController.h"
+#include "matrix.h"
+
+@interface MapDemoAppDelegate : NSObject <UIApplicationDelegate> {
+    UIWindow *window;
+	
+	MapViewController * mapView;
+}
+
+@property (nonatomic, retain) IBOutlet UIWindow *window;
+
+@end
+

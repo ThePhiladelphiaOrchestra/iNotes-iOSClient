@@ -1,0 +1,22 @@
+//
+//  PathPoint.h
+//  Test1
+//
+//  Created by Administrator on 4/29/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+
+@interface PathPoint : NSObject {
+	float x;
+	float y;
+	float t;
+}
+
+@property (nonatomic, assign) float x;
+@property (nonatomic, assign) float y;
+@property (nonatomic, assign) float t;
+
+@end

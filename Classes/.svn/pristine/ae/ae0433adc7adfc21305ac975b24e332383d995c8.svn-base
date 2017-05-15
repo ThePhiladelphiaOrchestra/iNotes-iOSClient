@@ -1,0 +1,16 @@
+//
+//  PathPoint.m
+//  Test1
+//
+//  Created by Administrator on 4/29/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import "PathPoint.h"
+
+
+@implementation PathPoint
+
+@synthesize x, y, t;
+
+@end

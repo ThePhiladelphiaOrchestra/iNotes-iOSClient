@@ -1,0 +1,45 @@
+//
+//  WebViewOverlay.h
+//  Test1
+//
+//  Created by Administrator on 2/19/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+#import <UIKit/UIKit.h>
+
+
+@protocol UIWebViewDelegateEx<NSObject, UIWebViewDelegate>
+
+/**
+ * Called when the view was touched by the user and wasn’t an anchor.
+ */
+- (void)tappedView;
+
+@end
+
+/**
+ * Intercept any touch events by displaying a transparent
+ * overlay on top of a web view.
+ */
+@interface WebOverlayView : UIView<UIWebViewDelegate> {
+	/**
+	 * The view that we are monitoring, i.e., the view that we will
+	 * possibly steal events from
+	 */
+	UIWebView *webViewComposite;
+	NSObject<UIWebViewDelegateEx> *delegate;
+	
+@private
+	BOOL didMove;
+	BOOL didShouldStartLoadViewRequestGetCalled; 
+	NSTimer *timer;
+}
+
+@property(nonatomic, retain) IBOutlet UIWebView *webViewComposite;
+@property(nonatomic, retain) IBOutlet NSObject<UIWebViewDelegate> *delegate;
+@property(nonatomic, retain) NSTimer *timer;
+
+@end

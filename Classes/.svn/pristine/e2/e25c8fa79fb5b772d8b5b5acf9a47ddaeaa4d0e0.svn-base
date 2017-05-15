@@ -1,0 +1,726 @@
+//
+//  SplashViewController.m
+//  iTennis
+//
+//  Created by Brandon Trebitowski on 3/18/09.
+//  Copyright 2009 __MyCompanyName__. All rights reserved.
+//
+
+#import "SplashViewController.h"
+#import "Test1AppDelegate.h"
+
+
+
+@implementation SplashViewController
+
+@synthesize timer,timer2, splashImageView, mainViewController,toolbarVisible,navigationController1;
+@synthesize instructViewController,bar,loadingContentImageView,chooseModeImageView, pieceBarItem,connectedItem;
+
+/*
+// The designated initializer. Override to perform setup that is required before the view is loaded.
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
+        // Custom initialization
+    }
+    return self;
+}
+*/
+Test1AppDelegate *appDelegate;
+
+- (id) init
+{
+	self = [super init];
+	if (self != nil) {
+		appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+	}
+	return self;
+}
+
+// Implement loadView to create a view hierarchy programmatically, without using a nib.
+- (void)loadView {
+	currentViewControllers = [[NSMutableArray alloc] init];
+
+	// Init the view
+	CGRect appFrame = [[UIScreen mainScreen] applicationFrame];
+	UIView *view = [[UIView alloc] initWithFrame:appFrame];
+	view.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+	self.view = view;
+	[view release];
+	
+	// Splash screen view
+	splashImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"OrchSplash.png"]];
+	splashImageView.frame = CGRectMake(0, 0, 480, 320);
+	splashImageView.alpha = 1.0;
+	
+	// Mode choosing view
+	chooseModeImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"loadingContent.png"]];
+	chooseModeImageView.frame = CGRectMake(0, 0, 480, 320);
+	chooseModeImageView.alpha = 1.0;
+
+	UITextView * introTextView = [[UITextView alloc] initWithFrame:CGRectMake(30, 50, appFrame.size.height-40, appFrame.size.width)];
+	[introTextView setUserInteractionEnabled:FALSE];
+	[introTextView setFont:[UIFont fontWithName:@"Arial" size:20]];
+	[introTextView setText:@"Welcome to the DrexelCast Orchestra Companion. Select Demo to listen to a pre-loaded piece, or DrexelCast for live performances."];
+	[introTextView setBackgroundColor:[UIColor clearColor]];
+	[introTextView setTextColor:[UIColor whiteColor]];
+	[chooseModeImageView addSubview:introTextView];
+	[introTextView release];
+	
+	UIButton * demoButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
+	demoButton.center = CGPointMake(appFrame.size.height/3, appFrame.size.width*2/3);
+	demoButton.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+	demoButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+	[demoButton setTitle:@"Run Demo" forState:UIControlStateNormal];	
+	demoButton.font = [UIFont fontWithName:@"Arial" size:15];
+	demoButton.tag = @"demo";
+	
+	[demoButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+	//[demoButton setTitleColor:[UIColor yellowColor] forState:UIControlStateSelected];
+
+	UIImage *newImage = [UIImage imageNamed:@"Redbutton.png"];
+	[demoButton setBackgroundImage:newImage forState:UIControlStateNormal];
+	[demoButton addTarget:self action:@selector(modeSelected:) forControlEvents:UIControlEventTouchDown];
+	
+	demoButton.backgroundColor = [UIColor clearColor];
+	[chooseModeImageView addSubview:demoButton];
+	[demoButton release];
+	[newImage release];
+	
+	liveButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
+	liveButton.center = CGPointMake(appFrame.size.height*2/3, appFrame.size.width*2/3);
+	liveButton.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+	liveButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+	[liveButton setTitle:@"DrexelCast" forState:UIControlStateNormal];	
+	liveButton.font = [UIFont fontWithName:@"Arial" size:15];
+	liveButton.tag = @"live";
+
+	[liveButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+	//[liveButton setTitleColor:[UIColor yellowColor] forState:UIControlStateSelected];
+
+	UIImage *newImage1 = [UIImage imageNamed:@"BluebuttonBig.png"];
+	[liveButton setBackgroundImage:newImage1 forState:UIControlStateNormal];
+	[liveButton addTarget:self action:@selector(modeSelected:) forControlEvents:UIControlEventTouchUpInside];
+	
+	liveButton.backgroundColor = [UIColor clearColor];
+	[chooseModeImageView addSubview:liveButton];
+	chooseModeImageView.userInteractionEnabled = YES;
+	//[liveButton release];
+	[newImage1 release];
+	
+	// Loading content view
+	loadingContentImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"loadingContent.png"]];
+	loadingContentImageView.frame = CGRectMake(0, 0, 480, 320);
+	loadingContentImageView.alpha = 1.0;
+	
+	statusLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 400, 100)];
+	statusLabel.center = CGPointMake(loadingContentImageView.frame.size.width/2, loadingContentImageView.frame.size.height/4);
+	statusLabel.textAlignment = UITextAlignmentCenter;
+	statusLabel.font = [UIFont systemFontOfSize:28.0f];
+	statusLabel.textColor = [UIColor whiteColor];
+	statusLabel.backgroundColor = [UIColor clearColor];
+	statusLabel.adjustsFontSizeToFitWidth = NO;
+	statusLabel.text = @"";
+	[loadingContentImageView addSubview:statusLabel];
+	
+	UIActivityIndicatorView * progressInd = [[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0,0, 50, 50)];
+	progressInd.center = CGPointMake(loadingContentImageView.frame.size.width/2, loadingContentImageView.frame.size.height/2);
+	[progressInd startAnimating];
+	progressInd.activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
+	[progressInd sizeToFit];
+	[loadingContentImageView addSubview:progressInd];
+	[progressInd release];
+	
+	downloadProgress = [[UIProgressView alloc] initWithFrame:CGRectMake(0,0,160,10)];
+	downloadProgress.center = CGPointMake(loadingContentImageView.frame.size.width/2, loadingContentImageView.frame.size.height*3/4);
+	[loadingContentImageView addSubview:downloadProgress];
+	
+	
+	mainViewController = [[MainViewController alloc] initWithTitle:@"Concert Program"] ;
+	mainViewController.view.alpha = 0.0;
+	mainViewController.tabBarItem.image = [UIImage imageNamed:@"menu.png"];
+	
+	//instructViewController = [[InstructionsViewController alloc] init] ;
+
+	
+	
+	
+		//[self.view addSubview:trackTabBar.view];
+
+
+	toolbarVisible = TRUE;
+	
+	// Create toolbar at top
+	bar = [UIToolbar new];
+	bar.barStyle = UIBarStyleBlackOpaque;
+	
+	// size up the toolbar and set its frame
+	[bar sizeToFit];
+	CGFloat toolbarHeight = 30.0f;
+	[bar setFrame:CGRectMake(0,
+							 0,
+							 appFrame.size.height,
+							 toolbarHeight)];
+	
+	//add button
+	// create a bordered style button with custom image
+	measureLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, 250, 15)];
+	measureLabel.textAlignment = UITextAlignmentCenter;
+	measureLabel.font = [UIFont systemFontOfSize:13.0f];
+	measureLabel.textColor = [UIColor whiteColor];
+	measureLabel.backgroundColor = [UIColor clearColor];
+	measureLabel.adjustsFontSizeToFitWidth = NO;
+	measureLabel.text = @"Orchestra Companion";
+	
+	networkReachableImage = [UIImage imageNamed:@"green_button.png"];
+	networkNotReachableImage = [UIImage imageNamed:@"red_button.png"];
+	networkImage = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, 15, 15)];
+	[networkImage setImage:networkNotReachableImage];
+
+//	UIBarButtonItem *measureItem = [[UIBarButtonItem alloc] initWithCustomView:measureLabel];
+//	UIBarButtonItem *flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+	connectedItem = [[UIBarButtonItem alloc] initWithCustomView:networkImage];
+	connectedItem.imageInsets = UIEdgeInsetsMake(0, 0, 0, 0);
+//	
+//	pieceBarItem = [[UIBarButtonItem alloc] initWithTitle:@""
+//																 style:UIBarButtonItemStyleBordered
+//																target:self
+//																action:@selector(hidePicker)];	
+//	pieceBarItem.enabled = FALSE;
+//	//UIBarButtonItem *infoItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"gear.png"] style:UIBarButtonItemStyleBordered target:self action:@selector(hidePicker)];
+//	UIBarButtonItem *networkItem = [[UIBarButtonItem alloc] initWithImage:[UIImage imageNamed:@"network.png"] style:UIBarButtonItemStylePlain target:nil action:nil];
+//	//networkItem.imageInsets = UIEdgeInsetsMake(5, 5, 5, 5);
+//	pieceBarItem.width = 0;
+//	//note the nil at the end
+//	NSArray *items = [NSArray arrayWithObjects: pieceBarItem, flexibleSpace, measureItem, flexibleSpace, connectedItem, nil];
+//	[bar setItems:items animated:NO];
+	//[self.view addSubview:bar];
+	
+	
+	navigationController1 = [[UINavigationController alloc] initWithRootViewController:mainViewController];
+	navigationController1.navigationBar.tintColor = [UIColor blackColor];
+	navigationController1.delegate = self;
+	navigationController1.view.clipsToBounds = YES;
+	//[navigationController1.navigationItem setRightBarButtonItem:connectedItem];
+	
+	[mainViewController.navigationItem setRightBarButtonItem:connectedItem];
+	//CGRect navRect = navigationController.navigationBar.frame;
+	//navigationController.navigationBar.frame = CGRectMake(0, navRect.origin.y, navRect.size.width, 20);
+	//navigationController.toolbar.frame = CGRectMake(navRect.origin.x, navRect.origin.y, navRect.size.width, 20);
+
+	
+	[self.view addSubview:navigationController1.view];
+	//[connectedItem release];
+	
+	[self.view addSubview:loadingContentImageView];
+	
+	// App version select
+	if(SHOW_MODE_OPTION){
+		
+		chooseAppVersionImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"loadingContent.png"]];
+		chooseAppVersionImageView.frame = CGRectMake(0, 0, 480, 320);
+		chooseAppVersionImageView.alpha = 1.0;
+		chooseAppVersionImageView.userInteractionEnabled = YES;
+
+		UITextView * modeTextView = [[UITextView alloc] initWithFrame:CGRectMake(30, 50, appFrame.size.height-40, appFrame.size.width)];
+		[modeTextView setUserInteractionEnabled:FALSE];
+		[modeTextView setFont:[UIFont fontWithName:@"Arial" size:20]];
+		[modeTextView setText:@"Select map mode or slideshow mode."];
+		[modeTextView setBackgroundColor:[UIColor clearColor]];
+		[modeTextView setTextColor:[UIColor whiteColor]];
+		[chooseAppVersionImageView addSubview:modeTextView];
+		[modeTextView release];
+		
+		UIButton * mapButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
+		mapButton.center = CGPointMake(appFrame.size.height/3, appFrame.size.width*2/3);
+		mapButton.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+		mapButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+		[mapButton setTitle:@"Map" forState:UIControlStateNormal];	
+		mapButton.font = [UIFont fontWithName:@"Arial" size:15];
+		mapButton.tag = @"map";
+		
+		[mapButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+		//[mapButton setTitleColor:[UIColor yellowColor] forState:UIControlStateSelected];
+		
+		UIImage *newImage3 = [UIImage imageNamed:@"Redbutton.png"];
+		[mapButton setBackgroundImage: newImage3 forState:UIControlStateNormal];
+		[mapButton addTarget:self action:@selector(versionSelected:) forControlEvents:UIControlEventTouchDown];
+		
+		mapButton.backgroundColor = [UIColor clearColor];
+		[chooseAppVersionImageView addSubview:mapButton];
+		[mapButton release];
+		[newImage3 release];
+		
+		UIButton * slideButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
+		slideButton.center = CGPointMake(2*appFrame.size.height/3, appFrame.size.width*2/3);
+		slideButton.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+		slideButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+		[slideButton setTitle:@"Slides" forState:UIControlStateNormal];	
+		slideButton.font = [UIFont fontWithName:@"Arial" size:15];
+		slideButton.tag = @"slide";
+		
+		[slideButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+		[slideButton setTitleColor:[UIColor yellowColor] forState:UIControlStateSelected];
+		
+		//UIImage *newImage = ;
+		[slideButton setBackgroundImage:[UIImage imageNamed:@"BluebuttonBig.png"] forState:UIControlStateNormal];
+		[slideButton addTarget:self action:@selector(versionSelected:) forControlEvents:UIControlEventTouchDown];
+		
+		slideButton.backgroundColor = [UIColor clearColor];
+		[chooseAppVersionImageView addSubview:slideButton];
+		[slideButton release];
+		//[newImage release];
+		
+		
+		[self.view addSubview:chooseAppVersionImageView];
+
+	}
+	else{
+		
+		
+	}
+	
+	if(SHOW_DREXELCAST_OPTION)
+		[self.view addSubview:chooseModeImageView];
+
+	
+	[self.view addSubview:splashImageView];
+
+	if(!SHOW_DREXELCAST_OPTION){
+		timer = [NSTimer scheduledTimerWithTimeInterval:2.0 target:self selector:@selector(fadeInLoadingScreen) userInfo:nil repeats:NO];
+		appDelegate.mode = LIVE_MODE;
+		appDelegate.USE_SLIDE_FORMAT = YES;
+		appDelegate.APPLICATION_STARTED = YES;
+	}
+	else{
+		timer = [NSTimer scheduledTimerWithTimeInterval:2.0 target:self selector:@selector(fadeInOptionScreen) userInfo:nil repeats:NO];
+
+	}
+	
+	//timer = [NSTimer scheduledTimerWithTimeInterval:2.0 target:self selector:@selector(fadeInOptionScreen) userInfo:nil repeats:NO];
+	//timer2 = [NSTimer scheduledTimerWithTimeInterval:1.0 target:self selector:@selector(finishedFading) userInfo:nil repeats:NO];
+
+//	piecePicker = [[UIPickerView alloc] initWithFrame:CGRectZero];
+//	
+//	int insetTop = 70;
+//	int insetRight = 20;
+//	
+//	CGSize size = CGSizeMake(360, 220);
+//	CGRect screenRect = [[UIScreen mainScreen] applicationFrame];
+//	CGRect pickerRect = CGRectMake((screenRect.size.height - size.width)/2,
+//								   - size.height,
+//								   size.width,
+//								   size.height);
+//	piecePicker.frame = pickerRect;
+//	
+//	//[piecePicker setContentStretch:CGRectMake(0, 150, 200, 200)];
+//	//piecePicker.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//	piecePicker.backgroundColor = [UIColor clearColor];
+//	piecePicker.showsSelectionIndicator = YES;	// note this is default to NO
+//	// this view controller is the data source and delegate
+//	piecePicker.delegate = mainViewController;
+//	piecePicker.dataSource = mainViewController;
+//	
+//	[self.view addSubview:piecePicker];
+	
+	
+	
+}
+
+-(void) clickedButton {
+	printf("clicked\n");
+}
+- (void) versionSelected:(id)sender {
+	NSString * s = ((UIButton *)sender).tag;
+	NSURL *fileURL;
+	
+	if([s isEqualToString:@"map"]){
+		appDelegate.USE_SLIDE_FORMAT = NO;		
+	}
+	else{
+		appDelegate.USE_SLIDE_FORMAT = YES;		
+	}
+	
+	if(appDelegate.mode == DEMO_MODE){
+		
+		if(!appDelegate.USE_SLIDE_FORMAT){
+			fileURL = [[NSURL alloc] initFileURLWithPath: [[NSBundle mainBundle] pathForResource:appDelegate.OFFLINE_FILE ofType:@"xml"]];
+			
+		}
+		else{
+			fileURL = [[NSURL alloc] initFileURLWithPath: [[NSBundle mainBundle] pathForResource:appDelegate.OFFLINE_FILE ofType:@"xml"]];
+		}
+		
+		NSString * xmlString = [[NSString alloc] initWithContentsOfURL:fileURL];
+		if([mainViewController parseData:[xmlString dataUsingEncoding:NSUTF8StringEncoding]]){
+			appDelegate.APPLICATION_STARTED = YES;
+			[mainViewController createTrackButtons];
+			//[mainViewController.tableView reloadData];
+			//[xmlString retain];
+			[self fadeInMainScreen];
+			if(SHOW_MODE_OPTION)
+				[chooseAppVersionImageView removeFromSuperview];
+			else
+				[chooseModeImageView removeFromSuperview];
+		}
+		else{
+			
+		}
+		
+	}
+	else if(appDelegate.mode == LIVE_MODE){
+		if(SHOW_MODE_OPTION)
+			[chooseAppVersionImageView removeFromSuperview];
+		else
+			[chooseModeImageView removeFromSuperview];
+		
+		appDelegate.APPLICATION_STARTED = YES;
+		[self fadeInLoadingScreen];
+	}
+}
+
+#pragma mark -
+#pragma mark UINavigationController delegate methods
+
+- (void)navigationController:(UINavigationController *)anavigationController willShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
+
+	anavigationController.navigationBar.frame = CGRectMake(0, 0, 480, 30);
+
+	if([viewController isKindOfClass:[UITabBarController class]]){
+		anavigationController.navigationBar.alpha = 0.0;
+	}
+	else if([viewController isKindOfClass:[GlossaryViewController class]]){
+		anavigationController.navigationBar.alpha = 1.0;
+	}
+	else if([viewController isKindOfClass:[MainViewController class]])
+		if(appDelegate.mode == DEMO_MODE && [appDelegate.player isPlaying] ){
+			[mainViewController.playControl.view removeFromSuperview];
+		}
+}
+
+- (void)navigationController:(UINavigationController *)anavigationController didShowViewController:(UIViewController *)viewController animated:(BOOL)animated {
+	if([viewController isKindOfClass:[MapViewController class]]){
+		[((MapViewController*)viewController) fadeInPath];
+		
+		//if(mainViewController.tabBarVisible)
+		//	[mainViewController hidetabbar];
+		
+		//((MapViewController*)viewController).view.frame = CGRectMake(0, 0, 480, 320);
+	}
+	//anavigationController.navigationBar.frame = CGRectMake(0, 0, 480, 30);
+//	if([viewController isKindOfClass:[GlossaryViewController class]]){
+//	Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+//	GlossaryViewController * glossary = appDelegate.glossary;
+//		[glossary.view setNeedsDisplay];
+//		[glossary.view setNeedsLayout];
+//	}
+}
+
+BOOL pickerVisible = FALSE;
+
+- (void) hidePicker {
+	CGRect pickerFrame = [piecePicker frame];
+	
+	[UIView beginAnimations:nil context:nil]; // begins animation block
+	[UIView setAnimationDuration:1.0];        // sets animation duration
+	[UIView setAnimationDelegate:self];        // sets delegate for this block
+	
+	int yLocation = 0;
+	if (pickerVisible){
+		yLocation = - (pickerFrame.size.height);
+		NSUInteger selectedRow = [piecePicker selectedRowInComponent:0];
+		NSString * title = [[piecePicker delegate] pickerView:piecePicker titleForRow:selectedRow forComponent:0];
+		[pieceBarItem setTitle:title];
+		[self updateMeasure];
+		//[mainViewController.view setUserInteractionEnabled:TRUE];
+		
+	}
+	else{
+		yLocation = 30;
+		[pieceBarItem setTitle:@"Done"];
+		measureLabel.text = @"<- Tap Done to hide the concert program.";
+
+		//[mainViewController.view setUserInteractionEnabled:FALSE];
+	}
+	piecePicker.frame = CGRectMake(pickerFrame.origin.x , yLocation, pickerFrame.size.width, pickerFrame.size.height);
+	
+	[UIView commitAnimations];   // commits the animation block.  This Block is done.
+	
+	pickerVisible = !pickerVisible;
+}
+
+-(void) updateProgress:(NSNumber *)number {
+	float f = [number floatValue];
+	[downloadProgress setProgress:f];
+}
+
+BOOL instructionsShowing = FALSE;
+
+-(void) showMenuView {
+	// This CRASHES, when you try to go from the instructions to the notesViewController
+	
+	//trackTabBar.viewControllers = [NSArray arrayWithObjects:mainViewController,notesViewController, nil];
+	if (!instructionsShowing){
+//		trackTabBar.viewControllers = currentViewControllers;
+//		trackTabBar.selectedViewController = mainViewController;
+//	}
+//	else {
+//		[trackTabBar setViewControllers: [NSArray arrayWithObjects:instructViewController, nil]];
+//		trackTabBar.selectedViewController = instructViewController;
+		[self.view addSubview:instructViewController.view];
+		//[self presentModalViewController:instructViewController animated:YES];
+	}
+	else{
+		[instructViewController.view removeFromSuperview];
+	}
+	
+	instructionsShowing = !instructionsShowing;
+}
+
+-(void) setConnected:(NSNumber *)connected {
+	if ([connected boolValue]){
+		networkImage.image = networkReachableImage;
+	}
+	else{
+		networkImage.image = networkNotReachableImage;
+	}
+	
+}
+
+-(void) updateMeasure {
+		
+	if(appDelegate.APPLICATION_STARTED){
+
+		int currentMeasure = appDelegate.CURRENT_MEASURE;
+		int totalMeasure = appDelegate.TOTAL_MEASURES;
+	
+		NSString * mString = [NSString stringWithFormat:@"%d / %d", currentMeasure, totalMeasure];
+		measureLabel.text = mString;
+		
+
+	}
+}
+
+-(void) onTimer{
+	NSLog(@"LOAD");
+}
+
+- (void) removeScreen {
+
+}
+
+-(void) changeTrack:(UIViewController *)track {
+//	Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+//
+//	UIViewController * selected = trackTabBar.selectedViewController;
+//	if([selected isKindOfClass:[NavigationViewController class]]){
+//		if( [[((NavigationViewController *)selected).trackData name] isEqualToString:appDelegate.CURRENT_PIECE] ) {
+//			
+//		}
+//	}
+}
+
+
+- (void) hideToolBar {
+//	CGRect toolBarFrame = [bar frame];
+//	
+//	[UIView beginAnimations:nil context:nil]; // begins animation block
+//	[UIView setAnimationDuration:kAnimationTime];        // sets animation duration
+//	[UIView setAnimationDelegate:self];        // sets delegate for this block
+//
+//	int yLocation = 0;
+//	if (toolbarVisible){
+//		yLocation = - (toolBarFrame.size.height);
+//	}
+//	else{
+//		yLocation = 0;
+//	}
+//	bar.frame = CGRectMake(toolBarFrame.origin.x , yLocation, toolBarFrame.size.width, toolBarFrame.size.height);
+//	
+//	[UIView commitAnimations];   // commits the animation block.  This Block is done.
+//	
+//	toolbarVisible = !toolbarVisible;
+}
+
+- (void) fadeInAppVersionScreen {
+	[UIView beginAnimations:nil context:nil]; // begins animation block
+	[UIView setAnimationDuration:1.0];        // sets animation duration
+	[UIView setAnimationDelegate:self];        // sets delegate for this block
+	[UIView setAnimationDidStopSelector:@selector(removeChooseMode)];   // calls the finishedFading method when the animation is done (or done fading out)	
+	
+	chooseModeImageView.alpha = 0.0;
+
+	[UIView commitAnimations];   // commits the animation block.  This Block is done.
+}
+
+- (void) removeChooseMode {
+	[chooseModeImageView removeFromSuperview];
+	
+	
+	//[self.view bringSubviewToFront:chooseAppVersionImageView];
+}
+
+- (void) modeSelected:(id) sender {
+
+	NSString * s = ((UIButton *)sender).tag;
+	
+	if([s isEqualToString:@"demo"]){
+		appDelegate.mode = DEMO_MODE;
+//		NSURL *fileURL = [[NSURL alloc] initFileURLWithPath: [[NSBundle mainBundle] pathForResource:@"output" ofType:@"xml"]];
+//		NSString * xmlString = [[NSString alloc] initWithContentsOfURL:fileURL];
+//		if([mainViewController parseData:[xmlString dataUsingEncoding:NSUTF8StringEncoding]]){
+//			appDelegate.APPLICATION_STARTED = YES;
+//			[mainViewController createTrackButtons];
+//			//[mainViewController.tableView reloadData];
+//			//[xmlString retain];
+//			[self fadeInMainScreen];
+//			[chooseModeImageView removeFromSuperview];
+//		}
+//		else{
+//			
+//		}
+
+	}
+	else if([s isEqualToString:@"live"]){
+		appDelegate.mode = LIVE_MODE;
+//		appDelegate.APPLICATION_STARTED = YES;
+//		[self fadeInLoadingScreen];
+	}
+	
+	if(SHOW_MODE_OPTION)
+		[self fadeInAppVersionScreen];
+	else{
+		UIButton * b = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+		b.tag = @"slide";
+		[self versionSelected:b];
+	}
+}
+
+- (void)fadeInLoadingScreen
+{
+	[UIView beginAnimations:nil context:nil]; // begins animation block
+	[UIView setAnimationDuration:1.0];        // sets animation duration
+	[UIView setAnimationDelegate:self];        // sets delegate for this block
+	[UIView setAnimationDidStopSelector:@selector(startLoadingContent)];   // calls the finishedFading method when the animation is done (or done fading out)	
+
+	splashImageView.alpha = 0.0;
+	if(SHOW_DREXELCAST_OPTION)
+		chooseModeImageView.alpha = 0.0;
+		
+	loadingContentImageView.alpha = 1.0;
+	
+	[UIView commitAnimations];   // commits the animation block.  This Block is done.
+}
+
+-(void) finishedTitleScreen {
+	[splashImageView removeFromSuperview];
+}
+
+- (void)fadeInOptionScreen
+{
+	[UIView beginAnimations:nil context:nil]; // begins animation block
+	[UIView setAnimationDuration:1.0];        // sets animation duration
+	[UIView setAnimationDelegate:self];        // sets delegate for this block
+	[UIView setAnimationDidStopSelector:@selector(finishedTitleScreen)];   // calls the finishedFading method when the animation is done (or done fading out)	
+	
+	splashImageView.alpha = 0.0;
+	//loadingContentImageView.alpha = 1.0;
+	
+	[UIView commitAnimations];   // commits the animation block.  This Block is done.
+}
+
+- (void)fadeInMainScreen
+{
+	[UIView beginAnimations:nil context:nil]; // begins animation block
+	[UIView setAnimationDuration:1.0];        // sets animation duration
+	[UIView setAnimationDelegate:self];        // sets delegate for this block
+	[UIView setAnimationDidStopSelector:@selector(finishedFading)];   // calls the finishedFading method when the animation is done (or done fading out)	
+	
+	loadingContentImageView.alpha = 0.0;
+	mainViewController.view.alpha = 1.0;
+	
+	[UIView commitAnimations];   // commits the animation block.  This Block is done.
+}
+
+-(void) startLoadingContent {
+	//[chooseModeImageView removeFromSuperview];
+	[NSThread detachNewThreadSelector: @selector(startConnectThread:) toTarget:mainViewController withObject:[NSNumber numberWithInt:5]];//initialize a thread that will poll server and send data based on change
+	//BOOL connected = [mainViewController startConnectThread:[NSNumber numberWithInt:5]];
+	statusLabel.text = @"Loading content...";
+
+}
+
+- (void)alertView:(UIAlertView *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+	// the user clicked one of the OK/Cancel buttons
+	if (buttonIndex == 0)
+	{
+		NSLog(@"ok");
+		[self fadeInMainScreen];
+
+	}
+	else
+	{
+		NSLog(@"exit");
+		[[UIApplication sharedApplication] terminateWithSuccess];
+	}
+}
+
+-(void) finishedFading {
+	[loadingContentImageView removeFromSuperview];
+
+}
+
+- (void) notifyFinished:(NSNumber *) success
+{
+	if ([success boolValue]){
+		[mainViewController.tableView reloadData];
+		[mainViewController.tableView scrollRectToVisible:CGRectMake(0, 1, 480, 320) animated:NO];
+		[self fadeInMainScreen];
+	}
+	else {
+		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Connection error:" message:@"Unable to contact the database server at this time. Check your internet settings. You may still browse the app, which notify you when/if a connection is made." delegate:self cancelButtonTitle:@"Continue" otherButtonTitles:@"Exit", nil];
+		[alert show];
+		[alert release];
+	}
+	
+	[NSThread detachNewThreadSelector: @selector(startConnectThread:) toTarget:mainViewController withObject:[NSNumber numberWithInt:0]];//initialize a thread that will poll server and send data based on change
+
+}
+
+
+/*
+// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
+- (void)viewDidLoad {
+    [super viewDidLoad];
+}
+*/
+
+
+// Override to allow orientations other than the default portrait orientation.
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    // Return YES for supported orientations
+    return (interfaceOrientation == UIInterfaceOrientationLandscapeLeft || interfaceOrientation == UIInterfaceOrientationLandscapeRight);
+}
+
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning]; // Releases the view if it doesn't have a superview
+//	if(chooseModeImageView)
+//		[chooseModeImageView release];
+//	//[chooseAppVersionImageView release];
+//	if(loadingContentImageView)
+//		[loadingContentImageView release];
+	
+    // Release anything that's not essential, such as cached data
+}
+
+
+- (void)dealloc {
+	[splashImageView release];
+	[measureLabel release];
+	[mainViewController release];
+	[navigationViewController release];
+    [super dealloc];
+}
+
+
+@end

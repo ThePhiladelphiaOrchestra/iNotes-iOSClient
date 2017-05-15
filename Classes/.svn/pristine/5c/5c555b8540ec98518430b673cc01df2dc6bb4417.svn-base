@@ -1,0 +1,568 @@
+//
+//  PageViewController.m
+//  Test1
+//
+//  Created by Administrator on 1/4/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import "PageViewController.h"
+#import "Test1AppDelegate.h"
+#import <QuartzCore/QuartzCore.h>
+
+#define MAX_IMAGE_WIDTH		205
+#define MAX_IMAGE_HEIGHT	200
+#define IMAGE_PAD			11
+
+const CGFloat TEXT_VIEW_PADDING = 10.0;
+
+@implementation PageViewController
+
+@synthesize pageIndex,didScroll;
+
+Test1AppDelegate *appDelegate;
+
+- (id) initWithTrack:(Track *)track 
+{
+	self = [super init];
+	if (self != nil) {
+		appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+		
+		trackData = track;
+		
+		CGRect appFrame = [[UIScreen mainScreen] applicationFrame];
+		UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 480, 320)];
+		view.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+		self.view = view;
+		[view release];
+		
+		imageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"loadingContent.png"]];
+		imageView.frame = CGRectMake(0, 0, appFrame.size.height, appFrame.size.width + 10);
+		[self.view addSubview:imageView];
+		
+		//overLay = [[WebOverlayView alloc] initWithFrame:CGRectMake(0, 0, 480, 290)];
+		
+		webView = [[UIWebView alloc] initWithFrame:CGRectMake(0, 0, 480,290)];
+		webView.backgroundColor = [UIColor clearColor];
+		webView.contentStretch = CGRectMake(0, 0, 480, 290);
+		//webView.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+		//webView.autoresizesSubviews = YES; 
+		webView.opaque = NO;
+		webView.userInteractionEnabled = YES;
+		webView.delegate = self;
+		[self.view addSubview:webView];
+
+		progressInd = [[UIActivityIndicatorView alloc] initWithFrame:CGRectMake(0,0, 50, 50)];
+		progressInd.center = CGPointMake(self.view.frame.size.width/2, self.view.frame.size.height/2);
+		[progressInd startAnimating];
+		progressInd.activityIndicatorViewStyle = UIActivityIndicatorViewStyleGray;
+		progressInd.backgroundColor = [UIColor clearColor];
+		
+		[self.view addSubview:progressInd];
+		
+		didScroll = FALSE;
+	}
+	return self;
+}
+
+-(NSInteger) getPageIndex {
+	return pageIndex;
+}
+
+- (void)setDataPage:(DataPage *) page
+{
+//	pageIndex = newPageIndex;
+//	
+//	if (pageIndex >= 0 && pageIndex < [trackData.pages count])
+//	{
+//		
+//		DataPage * page = [trackData.pages objectAtIndex:pageIndex];
+		if(page){
+			NSURL * fileURL;
+			NSString * htmlString;
+			NSString *path = [[NSBundle mainBundle] bundlePath];
+			NSURL *baseURL = [NSURL fileURLWithPath:path];	
+			NSString * formattedString;
+			NSString * newString;
+			
+			switch (page.html) {
+				case TEXT_AND_PICTURE:
+					fileURL = [[NSURL alloc] initFileURLWithPath: [[NSBundle mainBundle] pathForResource:@"template2" ofType:@"html"]];
+					htmlString = [[NSString alloc] initWithContentsOfURL:fileURL];
+					
+					newString =  [self insertHyperlinks:page.text];
+					
+					if([page.images count] != 0){
+						//if(0){
+						//NSArray * picArray = [page.images objectAtIndex:0];
+						NSString * picString = [page.images objectAtIndex:0];
+						
+						UIImage * pic = [UIImage imageNamed:picString];
+						CGFloat width = pic.size.width;
+						CGFloat height = pic.size.height;
+						[pic release];
+						
+						if(width > height){
+							if(width > MAX_IMAGE_WIDTH){
+								height = height*MAX_IMAGE_WIDTH/width;
+								width = MAX_IMAGE_WIDTH;
+							}
+						}
+						else{
+							if(height > MAX_IMAGE_HEIGHT){
+								width = width*MAX_IMAGE_HEIGHT/height;
+								height = MAX_IMAGE_HEIGHT;
+							}
+						}
+						
+						CGFloat textX = IMAGE_PAD*2 + width;
+						CGFloat textWidth = 480 - textX;
+						
+						formattedString = [NSString stringWithFormat:htmlString, page.measure, (int)IMAGE_PAD, (int)width, (int)height, [page.images objectAtIndex:0], (int)height + 48, (int)IMAGE_PAD, (int) width, [page.images objectAtIndex:1], appDelegate.TEXT_SIZE, (int)textX, (int)textWidth, newString];
+					}
+					else{
+						
+						formattedString = [NSString stringWithFormat:htmlString, page.measure, (int)IMAGE_PAD, 50, 50, @"mozart.jpg", 100 , 200, newString];
+					}
+					[webView loadHTMLString:formattedString baseURL:baseURL];
+					
+					break;
+				case TEXT_ONLY:
+					fileURL = [[NSURL alloc] initFileURLWithPath: [[NSBundle mainBundle] pathForResource:@"template1" ofType:@"html"]];
+					htmlString = [[NSString alloc] initWithContentsOfURL:fileURL];
+					
+					newString =  [self insertHyperlinks:page.text];
+					
+					formattedString = [NSString stringWithFormat:htmlString, page.measure, appDelegate.TEXT_SIZE, newString];
+					[webView loadHTMLString:formattedString baseURL:baseURL];
+					break;
+				case PICTURE_ONLY:
+					
+					fileURL = [[NSURL alloc] initFileURLWithPath: [[NSBundle mainBundle] pathForResource:@"template3" ofType:@"html"]];
+					htmlString = [[NSString alloc] initWithContentsOfURL:fileURL];
+					
+					if([page.images count] != 0){
+						//if(0){
+						NSString * picString = [page.images objectAtIndex:0];
+						
+						UIImage * pic = [UIImage imageNamed:picString];
+						
+						CGFloat width = pic.size.width;
+						CGFloat height = pic.size.height;
+						[pic release];
+						
+						if(height > MAX_IMAGE_HEIGHT){
+							width = width*MAX_IMAGE_HEIGHT/height;
+							height = MAX_IMAGE_HEIGHT;
+						}
+						
+						if(width > 480){
+							height = height*480/width;
+							width = 480;
+						}
+						
+						int left = (int)( (480 - width)/2.0 );
+						
+						formattedString = [NSString stringWithFormat:htmlString, page.measure, left, (int)width, (int)height, [page.images objectAtIndex:0], (int)height + 48, left, (int) width, [page.images objectAtIndex:1]];
+					}
+					else{
+						
+						formattedString = [NSString stringWithFormat:htmlString, page.measure, (int)IMAGE_PAD, 50, 50, @"mozart.jpg", 100 , 200, newString];
+					}
+					[webView loadHTMLString:formattedString baseURL:baseURL];
+					//[formattedString release];
+					break;
+			}
+			
+			[fileURL release];
+			[htmlString release];
+			//[baseURL release];	
+			//[formattedString release];
+			//[newString release];
+			//textView.text = page.text;
+			//measureLabel.text = [NSString stringWithFormat:@"%d", page.measure];
+			//timeLabel.text = [NSString stringWithFormat:@"Time: %f", page.time];
+		}
+//		
+		
+//		CGRect absoluteRect = [self.view.window
+//							   convertRect:webView.bounds
+//							   fromView:webView];
+//		if (!self.view.window ||
+//			!CGRectIntersectsRect(
+//								  CGRectInset(absoluteRect, TEXT_VIEW_PADDING, TEXT_VIEW_PADDING),
+//								  [self.view.window bounds]))
+//		{
+//			textViewNeedsUpdate = YES;
+//		}
+	//}
+	
+	//	[self.view setNeedsLayout];
+	//	[self.view setNeedsDisplay];
+}
+
+
+- (void)setPageIndex:(NSInteger)newPageIndex
+{
+	pageIndex = newPageIndex;
+	
+	if (pageIndex >= 0 && pageIndex < [trackData.pages count])
+	{
+		DataPage * page = [trackData.pages objectAtIndex:pageIndex];
+		if(page){
+			NSURL * fileURL;
+			NSString * htmlString;
+			NSString *path = [[NSBundle mainBundle] bundlePath];
+			NSURL *baseURL = [NSURL fileURLWithPath:path];	
+			NSString * formattedString;
+			NSString * newString;
+			
+			switch (page.html) {
+				case TEXT_AND_PICTURE:
+					fileURL = [[NSURL alloc] initFileURLWithPath: [[NSBundle mainBundle] pathForResource:@"template2" ofType:@"html"]];
+					htmlString = [[NSString alloc] initWithContentsOfURL:fileURL];
+					
+					newString =  [self insertHyperlinks:page.text];
+					
+					if([page.images count] != 0){
+					//if(0){
+						//NSArray * picArray = [page.images objectAtIndex:0];
+						NSString * picString = [page.images objectAtIndex:0];
+
+						UIImage * pic = [UIImage imageNamed:picString];
+						CGFloat width = pic.size.width;
+						CGFloat height = pic.size.height;
+						[pic release];
+
+						if(width > height){
+							if(width > MAX_IMAGE_WIDTH){
+								height = height*MAX_IMAGE_WIDTH/width;
+								width = MAX_IMAGE_WIDTH;
+							}
+						}
+						else{
+							if(height > MAX_IMAGE_HEIGHT){
+								width = width*MAX_IMAGE_HEIGHT/height;
+								height = MAX_IMAGE_HEIGHT;
+							}
+						}
+						
+						CGFloat textX = IMAGE_PAD*2 + width;
+						CGFloat textWidth = 480 - textX;
+						
+						NSString * cap = @"";
+						if([page.images count] > 1){
+							cap = [page.images objectAtIndex:1];
+						}
+
+//						formattedString = [NSString stringWithFormat:htmlString, page.measure, (int)IMAGE_PAD, (int)width, (int)height, [page.images objectAtIndex:0], (int)height + 48, (int)IMAGE_PAD, (int) width, cap, appDelegate.TEXT_SIZE, (int)textX, (int)textWidth, newString];
+						formattedString = [NSString stringWithFormat:htmlString, page.measure, (int)IMAGE_PAD, (int)width, (int)height, [page.images objectAtIndex:0], (int)height + 48, (int)IMAGE_PAD, (int) width, cap, appDelegate.TEXT_SIZE, IMAGE_PAD, 460, newString];
+
+					}
+					else{
+
+						formattedString = [NSString stringWithFormat:htmlString, page.measure, (int)IMAGE_PAD, 50, 50, @"mozart.jpg", 100 , 200, newString];
+					}
+					[webView loadHTMLString:formattedString baseURL:baseURL];
+					
+					break;
+				case TEXT_ONLY:
+					fileURL = [[NSURL alloc] initFileURLWithPath: [[NSBundle mainBundle] pathForResource:@"template1" ofType:@"html"]];
+					htmlString = [[NSString alloc] initWithContentsOfURL:fileURL];
+					
+					newString =  [self insertHyperlinks:page.text];
+
+					formattedString = [NSString stringWithFormat:htmlString, page.measure, appDelegate.TEXT_SIZE, newString];
+					[webView loadHTMLString:formattedString baseURL:baseURL];
+					break;
+				case PICTURE_ONLY:
+					
+					fileURL = [[NSURL alloc] initFileURLWithPath: [[NSBundle mainBundle] pathForResource:@"template3" ofType:@"html"]];
+					htmlString = [[NSString alloc] initWithContentsOfURL:fileURL];
+										
+					if([page.images count] != 0){
+						//if(0){
+						NSString * picString = [page.images objectAtIndex:0];
+						
+						UIImage * pic = [UIImage imageNamed:picString];
+						
+						CGFloat width = pic.size.width;
+						CGFloat height = pic.size.height;
+						[pic release];
+						
+						if(height > MAX_IMAGE_HEIGHT){
+							width = width*MAX_IMAGE_HEIGHT/height;
+							height = MAX_IMAGE_HEIGHT;
+						}
+						
+						if(width > 480){
+							height = height*480/width;
+							width = 480;
+						}
+						
+						int left = (int)( (480 - width)/2.0 );
+						
+						formattedString = [NSString stringWithFormat:htmlString, page.measure, left, (int)width, (int)height, [page.images objectAtIndex:0], (int)height + 48, left, (int) width, [page.images objectAtIndex:1]];
+					}
+					else{
+						
+						formattedString = [NSString stringWithFormat:htmlString, page.measure, (int)IMAGE_PAD, 50, 50, @"mozart.jpg", 100 , 200, newString];
+					}
+					[webView loadHTMLString:formattedString baseURL:baseURL];
+					//[formattedString release];
+					break;
+			}
+			
+			[fileURL release];
+			[htmlString release];
+			//[baseURL release];	
+			//[formattedString release];
+			//[newString release];
+			//textView.text = page.text;
+			//measureLabel.text = [NSString stringWithFormat:@"%d", page.measure];
+			//timeLabel.text = [NSString stringWithFormat:@"Time: %f", page.time];
+		}
+		
+
+		CGRect absoluteRect = [self.view.window
+							   convertRect:webView.bounds
+							   fromView:webView];
+		if (!self.view.window ||
+			!CGRectIntersectsRect(
+								  CGRectInset(absoluteRect, TEXT_VIEW_PADDING, TEXT_VIEW_PADDING),
+								  [self.view.window bounds]))
+		{
+			textViewNeedsUpdate = YES;
+		}
+	}
+	
+//	[self.view setNeedsLayout];
+//	[self.view setNeedsDisplay];
+}
+
+- (NSString *) insertHyperlinks:(NSString *) input {
+	NSString * link = @"<a style=\"color: #FFFF0B\" href=\"%@\">%@</a>";
+	NSMutableArray * tags = appDelegate.glossary.dataSource1.glossaryData;
+	NSString * formattedString = [[NSString alloc] initWithString:input];
+	
+	for(int i =0; i< [tags count]; i++){
+		GlossaryItem * item = [tags objectAtIndex:i];
+		NSString * thisTag = [item.name lowercaseString];
+		
+		NSString * temp = [formattedString stringByReplacingOccurrencesOfString:thisTag withString:[NSString stringWithFormat:link, thisTag, thisTag]];
+		[formattedString release];
+		[temp retain];
+		formattedString = temp;
+		
+//		NSString * thisTag2 = [NSString string [item.name lowercaseString]];
+//		
+//		NSString * temp2 = [formattedString stringByReplacingOccurrencesOfString:thisTag2 withString:[NSString stringWithFormat:link, item.name, thisTag2]];
+//		[formattedString release];
+//		[temp2 retain];
+//		formattedString = temp2;
+	}
+	
+	return formattedString;
+}
+
+- (void)updateTextViews:(BOOL)force
+{
+	if (force ||
+		(textViewNeedsUpdate &&
+		 self.view.window &&
+		 CGRectIntersectsRect(
+							  [self.view.window
+							   convertRect:CGRectInset(webView.bounds, TEXT_VIEW_PADDING, TEXT_VIEW_PADDING)
+							   fromView:webView],
+							  [self.view.window bounds])))
+	{
+		for (UIView *childView in self.view.subviews)
+		{
+			[childView setNeedsDisplay];
+		}
+		textViewNeedsUpdate = NO;
+	}
+}
+
+
+/*
+ // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
+        // Custom initialization
+    }
+    return self;
+}
+*/
+
+
+// Implement loadView to create a view hierarchy programmatically, without using a nib.
+- (void)loadView {
+	[super loadView];
+}
+
+
+
+// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
+- (void)viewDidLoad {
+    [super viewDidLoad];
+	
+
+	
+//	pageView = [[PageView alloc] initWithFrame:CGRectMake(0, 0, 480, 320)];
+//	
+//	//[self.view addSubview:overLay];
+//
+//	textView = [[UITextView alloc] initWithFrame:CGRectMake(0,0,300,300 + 60)];
+//	textView.center = CGPointMake(30, 300/2 - 30);
+//	[textView setFont:[UIFont systemFontOfSize:22]];
+//	[textView setBackgroundColor:[UIColor clearColor]];
+//	[textView setTextColor:[UIColor whiteColor]];
+//	[textView setUserInteractionEnabled:NO];
+//	[[self view] addSubview:textView];
+//	textView.text = @"";
+//	
+//	measureLabel = [[[UILabel alloc] initWithFrame:CGRectMake(textView.frame.origin.x - 85,textView.frame.origin.y, 150, 55)] autorelease];
+//	[measureLabel setText:@""];
+//	[measureLabel setFont:[UIFont fontWithName:@"Times New Roman" size:55]];
+//	[measureLabel setBackgroundColor:[UIColor clearColor]];
+//	[measureLabel setTextColor:[UIColor blueColor]];
+//	[measureLabel setShadowColor:[UIColor whiteColor]];
+//	[measureLabel setShadowOffset:CGSizeMake(1, -1)];
+//	[[self view] addSubview:measureLabel];
+//
+//	
+//	UILabel * tempLabel = [[[UILabel alloc] initWithFrame:CGRectMake(measureLabel.frame.origin.x, measureLabel.frame.origin.y - 15, 100, 15)] autorelease];
+//	[tempLabel setText:@""];
+//	[tempLabel setFont:[UIFont fontWithName:@"Times New Roman" size:12]];
+//	[tempLabel setBackgroundColor:[UIColor clearColor]];
+//	[tempLabel setTextColor:[UIColor blueColor]];
+//	[tempLabel setTextColor:[UIColor blueColor]];
+//	[tempLabel setShadowColor:[UIColor whiteColor]];
+//	[tempLabel setShadowOffset:CGSizeMake(1, -1)];
+//	[[self view] addSubview:tempLabel];
+//	[tempLabel release];
+//
+//	
+//	timeLabel = [[[UILabel alloc] initWithFrame:CGRectMake(measureLabel.frame.origin.x,measureLabel.frame.origin.y + 50, 150, 55)] autorelease];
+//	[timeLabel setText:@"Time: "];
+//	[timeLabel setFont:[UIFont fontWithName:@"Times New Roman" size:20]];
+//	[timeLabel setBackgroundColor:[UIColor clearColor]];
+//	[timeLabel setTextColor:[UIColor blueColor]];
+	//[[self view] addSubview:timeLabel];
+	
+
+}
+
+-(void) tappedView {
+	Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+	[appDelegate.splashViewController.mainViewController fadeTabBar];	
+
+}
+// Override to allow orientations other than the default portrait orientation.
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    // Return YES for supported orientations
+    return (interfaceOrientation == UIInterfaceOrientationLandscapeLeft || interfaceOrientation == UIInterfaceOrientationLandscapeRight);
+}
+
+
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+	
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+	Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+	[appDelegate.splashViewController.mainViewController fadeTabBar];
+	
+}
+
+- (BOOL)webView:(UIWebView*)webView1 shouldStartLoadWithRequest:(NSURLRequest*)request navigationType:(UIWebViewNavigationType)navigationType {
+	
+	NSString *path = [[request URL] path];
+	//NSLog(path);
+	
+	NSString * linkText = [path lastPathComponent];
+	//NSLog(linkText);
+	
+	switch (navigationType) {
+		case UIWebViewNavigationTypeLinkClicked:
+			printf("UIWebViewNavigationTypeLinkClicked");
+			break;
+		case UIWebViewNavigationTypeFormSubmitted:
+			printf("UIWebViewNavigationTypeFormSubmitted");
+			break;
+		case UIWebViewNavigationTypeBackForward:
+			printf("UIWebViewNavigationTypeBackForward");
+			break;
+		case UIWebViewNavigationTypeFormResubmitted:
+			printf("UIWebViewNavigationTypeFormResubmitted");
+			break;
+		case UIWebViewNavigationTypeReload:
+			printf("UIWebViewNavigationTypeReload");
+			break;
+		case UIWebViewNavigationTypeOther:
+			printf("UIWebViewNavigationTypeOther");
+			break;
+	}
+	
+	if(navigationType == UIWebViewNavigationTypeLinkClicked){
+		printf("Link clicked: %@ \n", linkText);
+		
+		Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+		GlossaryViewController * glossary = appDelegate.glossary;
+		glossary.navigationItem.title = @"Glossary";
+		
+//		UIImageView * t = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"play.png"]];
+//		UIBarButtonItem *connectedItem = [[UIBarButtonItem alloc] initWithCustomView:t];
+//		[glossary.navigationItem setRightBarButtonItem:connectedItem];
+		[glossary goToPage:linkText];
+
+		//[appDelegate.splashViewController.mainViewController fadeTabBar];
+		
+		//[appDelegate.splashViewController.mainViewController performSelectorOnMainThread:@selector(push:) withObject:glossary waitUntilDone:YES];
+		[appDelegate.splashViewController.mainViewController.navigationController pushViewController:glossary animated:YES];
+		//[(UINavigationController *)[appDelegate.splashViewController.mainViewController.trackTabBar selectedViewController] pushViewController:glossary animated:YES];
+
+		//[self presentModalViewController:glossary animated:YES];
+		return YES;
+	}
+	else{
+		return YES;
+	}
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView1 {
+	//if(progressInd){
+	[progressInd removeFromSuperview];
+	//[progressInd release];
+	//}
+}
+
+- (void)webView:(UIWebView *)webView1 didFailLoadWithError:(NSError *)error {
+
+}
+
+- (void)didReceiveMemoryWarning {
+	// Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+	
+	// Release any cached data, images, etc that aren't in use.
+}
+
+- (void)viewDidUnload {
+	// Release any retained subviews of the main view.
+	// e.g. self.myOutlet = nil;
+}
+
+
+- (void)dealloc {
+    [super dealloc];
+}
+
+
+@end

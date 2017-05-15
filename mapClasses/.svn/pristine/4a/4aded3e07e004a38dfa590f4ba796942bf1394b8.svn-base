@@ -1,0 +1,39 @@
+//
+//  MapDemoAppDelegate.m
+//  MapDemo
+//
+//  Created by Administrator on 4/5/10.
+//  Copyright Drexel University 2010. All rights reserved.
+//
+
+#import "MapDemoAppDelegate.h"
+
+
+@implementation MapDemoAppDelegate
+
+@synthesize window;
+
+- (void)applicationDidFinishLaunching:(UIApplication *)application {    
+	[UIApplication sharedApplication].statusBarHidden = YES;
+	mapView = [[MapViewController alloc] init];
+	[mapView setTracks: 5];
+
+	[window addSubview:mapView.view];
+	
+    // Override point for customization after application launch
+    [window makeKeyAndVisible];
+}
+
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    // Return YES for supported orientations
+    return (interfaceOrientation == UIInterfaceOrientationLandscapeLeft || interfaceOrientation == UIInterfaceOrientationLandscapeRight);
+}
+
+
+- (void)dealloc {
+    [window release];
+    [super dealloc];
+}
+
+
+@end

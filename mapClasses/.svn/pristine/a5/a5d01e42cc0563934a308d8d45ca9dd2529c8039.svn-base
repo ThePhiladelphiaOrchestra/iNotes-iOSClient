@@ -1,0 +1,28 @@
+//
+//  Matrix.h
+//  MapDemo
+//
+//  Created by Administrator on 4/12/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+
+@interface Matrix : NSObject {
+	float * data;
+	int rows;
+	int cols;
+}
+
+- (void) setValue:(int) row col:(int) col value:(float) value1 ;
+- (float) getValue:(int) row col:(int) col;
++ (Matrix *) multiply:(Matrix *) left withMatrix:(Matrix *) right ;
+- (void) printMat ;
+- (void) invert ;
+- (id) initWithSize:(int) rows1 cols:(int) cols1 ;
+
+@property (nonatomic, assign) int rows;
+@property (nonatomic, assign) int cols;
+
+@end

@@ -1,0 +1,34 @@
+//
+//  MarkerView.h
+//  MapDemo
+//
+//  Created by Administrator on 4/6/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "PageViewController.h"
+#import "DataPage.h"
+
+typedef enum  {
+	TYPE_STRUCTURE, TYPE_OTHER
+} MarkerType;
+
+@interface MarkerView : UIImageView {
+	PageViewController * page;
+	CGPoint location;
+	float time;
+	DataPage * dataPage;
+	CGRect pageRect;
+	MarkerType type;
+}
+
+@property (nonatomic, retain) PageViewController * page;
+@property (nonatomic, retain) DataPage * dataPage;
+
+@property (nonatomic, assign) CGPoint location;
+@property (nonatomic, assign) float time;
+@property (nonatomic, assign) CGRect pageRect;
+@property (nonatomic, assign) MarkerType type;
+
+@end

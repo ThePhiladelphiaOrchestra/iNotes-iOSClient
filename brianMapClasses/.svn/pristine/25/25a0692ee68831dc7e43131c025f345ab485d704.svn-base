@@ -1,0 +1,154 @@
+//
+//  PathBandsView.m
+//  Test1
+//
+//  Created by Brian Dolhansky on 5/26/10.
+//  Copyright 2010 __MyCompanyName__. All rights reserved.
+//
+
+#import "PathBandsView.h"
+#import "PathView.h"
+#import "MarkerView.h"
+
+@implementation PathBandsView
+@synthesize pathView;
+@synthesize bandText, needsDrawing;
+
+- (id)initWithFrame:(CGRect)frame {
+    if ((self = [super initWithFrame:frame])) {
+        // Initialization code
+		[self setBackgroundColor:[UIColor clearColor]];
+		uniqueYPoints = [[NSMutableArray alloc] init];
+		avgSpacing = 0;
+		
+		dataPoints = [[NSMutableArray alloc] init];
+		needsDrawing = YES;
+		//numDraws = 0;
+		// Make phony section names
+		bandText = [[NSMutableArray alloc] init];
+//		[bandText addObject:@"SECTION A"];
+//		[bandText addObject:@"SECTION B"];
+//		[bandText addObject:@"SECTION C"];
+//		[bandText addObject:@"SECTION D"];
+//		[bandText addObject:@"SECTION E"];
+//		[bandText addObject:@"SECTION F"];
+//		[bandText addObject:@"SECTION G"];
+//		[bandText addObject:@"SECTION H"];
+//		[bandText addObject:@"SECTION I"];
+//		[bandText addObject:@"SECTION J"];
+    }
+    return self;
+}
+
+-(void) setBandText:(NSMutableArray *) newBandText {
+	[bandText removeAllObjects];
+	
+	for(NSString * t  in newBandText){
+		[bandText addObject:t];
+	}
+}
+
+- (void)setDataPoints:(NSMutableArray *)newDataPoints {
+	dataPoints = newDataPoints;
+	[self setUniqueYPoints:newDataPoints];
+}
+
+- (void)setUniqueYPoints:(NSMutableArray *)newUniqueYPoints {
+	[uniqueYPoints removeAllObjects];
+	
+	float last = 0;
+	if ([newUniqueYPoints count]>0) {
+		for (int i=0; i<[newUniqueYPoints count]; i++) {
+			MarkerView* m = [newUniqueYPoints objectAtIndex:i];
+			NSNumber* yLoc = [[NSNumber alloc] initWithFloat:[m location].y];
+			
+			if ( ![uniqueYPoints containsObject:yLoc] )
+				[uniqueYPoints addObject:yLoc];
+			
+			if (i==1) {
+				last = [yLoc floatValue];
+			} else if (i==2) {
+				avgSpacing = abs([yLoc floatValue] - last);
+			}
+			
+			[yLoc release];
+		}
+	}
+	
+	[uniqueYPoints sortUsingSelector:@selector(compare:)];
+}
+
+- (void)drawRect:(CGRect)rect {
+	if ( pathView != nil ) {
+		CGContextRef c = UIGraphicsGetCurrentContext();
+		CGContextClearRect(c, self.frame);
+		
+		const CGFloat oceanColor[4] = {99.0/255.0, 142.0/255.0, 163.0/255.0, 1.0};
+		CGContextSetFillColor(c, oceanColor);
+		CGContextFillRect(c, CGRectMake(-150, 0, 350, 1000));
+		CGContextFillRect(c, CGRectMake(890, 0, 350, 1000));
+		CGContextFillRect(c, CGRectMake(0, 675, 1000, 350));
+		CGContextFillRect(c, CGRectMake(0, 0, 1000, 35));
+		
+		const CGFloat bandColor[4] = {1.0, 1.0, 1.0, 1.0};
+		CGFloat bandAlphaBright = 0.1;
+		
+		CGContextSetFillColor(c, bandColor);
+		
+		// Draw bands
+		bool draw = true;
+		CGContextSetFillColor(c, bandColor);
+		CGContextSetAlpha(c, bandAlphaBright);
+		for (int i=0; i<50; i++) {
+			float start = [[uniqueYPoints objectAtIndex:0] floatValue];
+			CGContextFillRect(c, CGRectMake(start+(i-1)*avgSpacing, 0, 1, 1000));
+			CGContextFillRect(c, CGRectMake(0, start+(i-1)*avgSpacing, 1200, ceil(2*(float)i/5.0)));
+		}
+		
+		draw = true;
+		for (int i=0; i<[uniqueYPoints count]; i++) {
+			float yLoc = [[uniqueYPoints objectAtIndex:i] floatValue];
+			CGContextSetFillColor(c, bandColor);
+			
+			float dist = abs([pathView cursor].center.y-yLoc);
+			if ( dist < avgSpacing/2.0 ) {
+				CGContextSetAlpha(c, bandAlphaBright+(avgSpacing/2.0 - dist)/(avgSpacing/2.0)*0.1);
+				CGContextFillRect(c, CGRectMake(-300, yLoc-avgSpacing/2.0+100, 1200, avgSpacing));
+			}
+//				if (draw)
+//					CGContextSetAlpha(c, bandAlphaBright+(16-dist)/16*0.1);
+//				else 
+//					CGContextSetAlpha(c, bandAlphaDark+2*(16-dist)/16*0.1);
+//			} else {
+//				if (draw)
+//					CGContextSetAlpha(c, 0);
+//				else 
+//					CGContextSetAlpha(c, 0);
+//			}
+//			CGContextFillRect(c, CGRectMake(-200, yLoc-16+120, 900, 32));
+			
+			//draw = 1-draw;
+			
+			// Draw text			
+			if ( i < [bandText count] ) {
+				const char* text = [[bandText objectAtIndex:i] UTF8String];
+				CGContextSetAlpha(c, 1.0);
+				CGContextSelectFont(c, "Helvetica", 24.0, kCGEncodingMacRoman);
+				CGContextSetTextDrawingMode(c, kCGTextFill);
+				CGContextSetRGBFillColor(c, 0.0, 0.0, 0.0, 0.4);
+				CGContextShowTextAtPoint(c, 320, yLoc-10+100, text, strlen(text));
+			}
+			
+			
+		}
+	}
+}
+
+- (void)dealloc {
+	[bandText release]; 
+	[dataPoints release];
+    [super dealloc];
+}
+
+
+@end

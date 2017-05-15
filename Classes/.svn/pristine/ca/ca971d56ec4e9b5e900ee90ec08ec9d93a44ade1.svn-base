@@ -1,0 +1,135 @@
+//
+//  MainViewController.h
+//  Test1
+//
+//  Created by Administrator on 11/16/09.
+//  Copyright 2009 Drexel University. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import "BufferedSocket.h"
+#import "NavigationViewController.h"
+#import "NotesViewController.h"
+#import "DataPage.h"
+#import "MusicPiece.h"
+#import "MapViewController.h"
+#import "ProgramNotesViewController.h"
+
+typedef enum {
+	CONTENT, MEASURE
+} Mode;
+
+#define HORIZ_SWIPE_DRAG_MIN  12
+#define VERT_SWIPE_DRAG_MAX    4
+
+@interface MainViewController : UIViewController <UIPickerViewDelegate, UIPickerViewDataSource> {
+	CGPoint startTouchPosition;
+	NotesViewController *notesViewController;
+	BOOL tabBarVisible;
+
+	NSMutableArray * currentViewControllers;
+
+	NSMutableDictionary * arrayOfTracks;
+	
+	Mode mode;
+	UIImageView *backGroundImageView;
+	UILabel *connectLabel;
+	
+	UILabel * currentMeasure;
+	UITextField *textField;
+	
+	int whichTrack;
+	
+	UIPickerView * piecePicker;
+	NSMutableArray * pickerViewArray;
+	
+	UIView *tempView;
+	
+	///NETWORK
+	Socket* mySocket;
+	NSString *ipAdd;
+	int portNum;
+	bool connected;
+	NSMutableData* data;
+	NSString* responseString;
+	NSString* stringMeasure;
+	NSString* idNum;
+	int currentMeasureNumber;
+	int cm;
+	UILabel* textView;
+	NSTimer *myTimer;
+	
+	UIButton *connectButton;
+    UIButton *disconnectButton;
+	UIButton *receiveButton;
+	
+	UIButton * flipButton;
+	UIButton * loadContentButton;
+	UIButton * startTrackingButton;
+
+	
+	
+	// Temp structures for parsing the XML content
+	NSMutableString * currentProperty;
+	Track * currentTrack;
+	DataPage * currentDataPage;
+	MusicPiece * currentMusicPiece;
+	
+	// Final array which holds the MusicPiece's
+	NSMutableArray *  thePieces;
+	
+	NSMutableArray * trackButtonArray;
+	NSMutableArray * pieceList;
+	
+	UITextView * introTextView;
+	
+	BOOL flipped;
+	UITabBarController * trackTabBar;
+
+	UITableView * tableView;
+	PlaybackControlViewController *  playControl;
+	UIBarButtonItem * albumBarItem;
+	
+	NSMutableDictionary * mapArray;
+	MapViewController * selectedMapController;
+	NSString * contentString;
+	
+	ProgramNotesViewController * programNotes;
+}
+
+
+-(void)updateView;
+
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event;
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event;
+
+
+//Network
+-(IBAction) connect:(id) sender;
+-(IBAction)receiveData:(id)sender;
+-(IBAction) release:(id) sender;
+-(IBAction) current:(id) sender;
+-(void) flip;
+-(void) loadContent;
+-(void) sendMessage:(NSString *) m;
+
+@property (assign) BOOL flipped;
+@property (assign) BOOL tabBarVisible;
+
+@property (assign) int currentMeasureNumber;
+@property (nonatomic, retain) NSTimer *myTimer;
+@property (nonatomic, retain) PlaybackControlViewController *  playControl;
+@property (retain) NSMutableString *currentProperty;
+@property (retain) Track *currentTrack;
+@property (retain) DataPage *currentDataPage;
+@property (retain) MusicPiece *currentMusicPiece;
+@property (retain) NSMutableArray *thePieces;
+@property (retain) NSMutableArray *trackButtonArray;
+@property (retain) Socket *mySocket;
+@property (retain) NSMutableDictionary * arrayOfTracks;
+@property (retain) UITableView * tableView;
+@property (retain) UITabBarController *trackTabBar;
+
+
+@end

@@ -1,0 +1,61 @@
+//
+//  Utility.m
+//  Untitled
+//
+//  Created by Matthew Prockup on 2/15/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import "Utility.h"
+
+
+@implementation Utility
+
+
++(UIColor *)randomColor
+{
+	CGFloat red =  (CGFloat)arc4random()/(CGFloat)RAND_MAX;
+	CGFloat blue = (CGFloat)arc4random()/(CGFloat)RAND_MAX;
+	CGFloat green = (CGFloat)arc4random()/(CGFloat)RAND_MAX;
+	return [UIColor colorWithRed:red green:green blue:blue alpha:1.0];
+}
+
++ (UIImage *) colorizeImage:(UIImage *)baseImage color:(UIColor *)theColor {
+    UIGraphicsBeginImageContext(baseImage.size);
+    
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    CGRect area = CGRectMake(0, 0, baseImage.size.width, baseImage.size.height);
+    
+    CGContextScaleCTM(ctx, 1, -1);
+    CGContextTranslateCTM(ctx, 0, -area.size.height);
+    
+    CGContextSaveGState(ctx);
+    CGContextClipToMask(ctx, area, baseImage.CGImage);
+    
+    [theColor set];
+    CGContextFillRect(ctx, area);
+	
+    CGContextRestoreGState(ctx);
+    
+    CGContextSetBlendMode(ctx, kCGBlendModeMultiply);
+    
+    CGContextDrawImage(ctx, area, baseImage.CGImage);
+	
+    UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
+    
+    UIGraphicsEndImageContext();
+    
+    return newImage;
+}
+
++ (UIImage *) resizeImage:(UIImage*) input toSize:(CGSize) size {
+	
+	UIGraphicsBeginImageContext( size );
+	[input drawInRect:CGRectMake(0,0,size.width,size.height)];
+	UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
+	UIGraphicsEndImageContext();
+	
+	return newImage;
+}
+
+@end

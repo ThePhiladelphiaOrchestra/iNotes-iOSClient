@@ -1,0 +1,19 @@
+//
+//  TimeScaleView.h
+//  Test1
+//
+//  Created by Administrator on 5/12/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+
+@interface TimeScaleView : UIView {
+	float scale;
+	float startTime;
+}
+
+@property (nonatomic, assign) float scale;
+@property (nonatomic, assign) float startTime;
+@end

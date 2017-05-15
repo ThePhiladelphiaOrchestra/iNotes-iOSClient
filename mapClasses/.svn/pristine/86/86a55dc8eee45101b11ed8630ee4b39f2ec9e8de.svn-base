@@ -1,0 +1,297 @@
+//
+//  MapScrollView.m
+//  MapDemo
+//
+//  Created by Administrator on 4/6/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import "MapScrollView.h"
+#import "Test1AppDelegate.h"
+
+CGPoint midpointBetweenPoints(CGPoint a, CGPoint b);
+
+#define DOUBLE_TAP_DELAY 0.35
+
+
+@implementation MapScrollView
+
+@synthesize zoomedIn, thePageViewController, callout;
+
+Test1AppDelegate *appDelegate;
+
+- (id) initWithFrame:(CGRect) rect
+{
+	self = [super initWithFrame:rect];
+	if (self != nil) {
+		[self setUserInteractionEnabled:YES];
+        [self setMultipleTouchEnabled:YES];
+		twoFingerTapIsPossible = YES;
+        multipleTouches = NO;
+		zoomedIn  = NO;
+		appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+
+
+	}
+	return self;
+}
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(handleSingleTap) object:nil];
+	
+    // update our touch state
+    if ([[event touchesForView:self] count] > 1)
+        multipleTouches = YES;
+    if ([[event touchesForView:self] count] > 2)
+        twoFingerTapIsPossible = NO;
+	
+	
+	printf("begin\n");
+	
+}
+
+- (void)scrollViewDidZoom:(UIScrollView *)scrollView {
+	
+}
+
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+    twoFingerTapIsPossible = YES;
+    multipleTouches = NO;
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+    BOOL allTouchesEnded = ([touches count] == [[event touchesForView:self] count]);
+
+
+    // first check for plain single/double tap, which is only possible if we haven't seen multiple touches
+    if (!multipleTouches) {
+        UITouch *touch = [touches anyObject];
+        tapLocation = [touch locationInView:self];
+        
+        if ([touch tapCount] == 1) {
+            [self performSelector:@selector(handleSingleTap) withObject:nil afterDelay:DOUBLE_TAP_DELAY];
+        } else if([touch tapCount] == 2) {
+            [self handleDoubleTap];
+        }
+
+    }    
+    
+    // check for 2-finger tap if we've seen multiple touches and haven't yet ruled out that possibility
+    else if (multipleTouches && twoFingerTapIsPossible) { 
+        
+        // case 1: this is the end of both touches at once 
+        if ([touches count] == 2 && allTouchesEnded) {
+            int i = 0; 
+            int tapCounts[2]; CGPoint tapLocations[2];
+            for (UITouch *touch in touches) {
+                tapCounts[i]    = [touch tapCount];
+                tapLocations[i] = [touch locationInView:self];
+                i++;
+            }
+            if (tapCounts[0] == 1 && tapCounts[1] == 1) { // it's a two-finger tap if they're both single taps
+                tapLocation = midpointBetweenPoints(tapLocations[0], tapLocations[1]);
+                //[self handleTwoFingerTap];
+            }
+        }
+        
+        // case 2: this is the end of one touch, and the other hasn't ended yet
+        else if ([touches count] == 1 && !allTouchesEnded) {
+            UITouch *touch = [touches anyObject];
+            if ([touch tapCount] == 1) {
+                // if touch is a single tap, store its location so we can average it with the second touch location
+                tapLocation = [touch locationInView:self];
+            } else {
+                twoFingerTapIsPossible = NO;
+            }
+        }
+		
+        // case 3: this is the end of the second of the two touches
+        else if ([touches count] == 1 && allTouchesEnded) {
+            UITouch *touch = [touches anyObject];
+            if ([touch tapCount] == 1) {
+                // if the last touch up is a single tap, this was a 2-finger tap
+                tapLocation = midpointBetweenPoints(tapLocation, [touch locationInView:self]);
+                //[self handleTwoFingerTap];
+            }
+        }
+    }
+	
+    // if all touches are up, reset touch monitoring state
+    if (allTouchesEnded) {
+        twoFingerTapIsPossible = YES;
+        multipleTouches = NO;
+    }
+	//printf("end\n");
+	
+}
+
+- (void)handleSingleTap {
+	
+	BOOL touchedMarker = FALSE;
+	BOOL tappedCallout = FALSE;
+	
+	
+	if(self.zoomScale > FIRST_LEVEL_ZOOM){
+		for(UIView * view in [self subviews]){
+			if([view isKindOfClass:[MarkerView class]]){
+				if(CGRectContainsPoint(view.frame, tapLocation)){
+					touchedMarker = TRUE;
+					selectedPage = (MarkerView *)view;
+					
+					thePageViewController.view.center = CGPointMake(selectedPage.location.x,  selectedPage.location.y);
+					
+					if (callout != nil) {
+						[callout removeFromSuperview];
+						callout = nil;
+					}
+					
+					CGPoint calloutPoint = CGPointMake(((MarkerView *)view).location.x * self.zoomScale, ((MarkerView *)view).location.y * self.zoomScale);
+					callout = [CallOutView addCalloutView:self text:selectedPage.dataPage.parentTrack point:calloutPoint target:self action:@selector(zoomToSelectedMarker)];	
+					
+					
+					break;
+				}
+			}
+			
+			
+			if([[self subviews] containsObject:callout]){
+				//if(CGRectContainsPoint(callout.bounds, tapLocation)){
+				tappedCallout = TRUE;
+				//}
+			}
+			
+		}
+	}
+	
+	if(!touchedMarker && !tappedCallout){
+		[appDelegate.splashViewController.mainViewController fadeTabBar];
+	}
+}
+
+- (void)handleDoubleTap {
+	float scale;
+	if(zoomedIn){
+		scale = 1.0;
+	}
+	else{
+		scale = ZOOM_IN_AMOUNT;
+	}
+	
+	CGRect zoomRect;
+	
+	// the zoom rect is in the content view's coordinates. 
+	//    At a zoom scale of 1.0, it would be the size of the imageScrollView's bounds.
+	//    As the zoom scale decreases, so more content is visible, the size of the rect grows.
+	zoomRect.size.height = [self frame].size.height / scale;
+	zoomRect.size.width  = [self frame].size.width  / scale;
+	
+	// choose an origin so as to get the right center.
+	zoomRect.origin.x    = tapLocation.x - (zoomRect.size.width  / 2.0);
+	zoomRect.origin.y    = tapLocation.y - (zoomRect.size.height / 2.0);
+	
+	if (zoomedIn){
+		[UIView beginAnimations:nil context:nil]; // begins animation block
+		[UIView setAnimationDuration:1.0];        // sets animation duration
+		[UIView setAnimationDelegate:self];        // sets delegate for this block
+		thePageViewController.view.alpha = 0.0;
+		[UIView commitAnimations]; 
+		
+	}
+	[self zoomToRect:zoomRect animated:YES];
+	zoomedIn = !zoomedIn;
+}
+
+- (void) zoomToSelectedMarker {
+	CGRect zoomRect;
+	float alphaView;
+	
+	if(!zoomedIn){
+		alphaView = 1.0;
+
+	
+	if(!thePageViewController)
+		thePageViewController = [[PageViewController alloc] initWithTrack:nil];
+	
+	[thePageViewController setDataPage:selectedPage.dataPage];
+	
+//	thePageViewController.view.transform = CGAffineTransformMakeScale(1.0 / ZOOM_IN_AMOUNT, 1.0 / ZOOM_IN_AMOUNT);
+	thePageViewController.view.transform = CGAffineTransformIdentity;
+
+	thePageViewController.view.alpha = 1.0;
+	
+		zoomRect = thePageViewController.view.frame;
+		[appDelegate.splashViewController.mainViewController.navigationController pushViewController:thePageViewController animated:YES];
+		
+	}
+	else{
+		zoomRect = [self frame];
+		alphaView = 0.0;
+	}
+	
+//	[UIView beginAnimations:nil context:nil]; // begins animation block
+//	[UIView setAnimationDuration:0.5];        // sets animation duration
+//	[UIView setAnimationDelegate:self];        // sets delegate for this block
+//	//[UIView setAnimationDidStopSelector:@selector(animationFinished:finished:context:)];
+//	
+//	thePageViewController.view.alpha = alphaView;
+//	[self zoomToRect:zoomRect animated:NO];
+//	
+//	[UIView commitAnimations]; 
+//
+//	zoomedIn = !zoomedIn;
+//	
+//	for(UIView * uv in [self subviews]){
+//		if([uv isKindOfClass:[MarkerView class]]){
+//		if(((MarkerView *)uv).type == TYPE_OTHER){
+//			uv.alpha = 0.0;
+//		}
+//		}
+//	}
+}
+
+//-(void) animationFinished:(NSString *)animationID finished:(BOOL)finished context:(void *)context{ 
+//	PageViewController * p = (PageViewController *)context;
+//	self.zoomScale = 1.0;
+//	[self addSubview:p.view];
+//	[p release];
+//	
+//}
+
+BOOL toolbarVisible = FALSE;
+
+
+-(void) hideToolbar {
+	UIView * viewToMove;
+	
+	for(UIView * v in [self subviews]){
+		if([v isKindOfClass:[UIToolbar class]]){
+			
+			float yPos = (toolbarVisible ? 320 - TOOLBAR_HEIGHT : 320);
+			
+			[UIView beginAnimations:nil context:nil]; // begins animation block
+			[UIView setAnimationDuration:0.5];        // sets animation duration
+			[UIView setAnimationDelegate:self];        // sets delegate for this block
+			v.frame = CGRectMake(v.frame.origin.x, yPos, 480, TOOLBAR_HEIGHT);
+			[UIView commitAnimations]; 
+			
+			
+			toolbarVisible = !toolbarVisible;
+			break;
+		}
+	}
+	
+
+}
+
+-(void) barCallback {
+	
+}
+
+
+@end
+
+CGPoint midpointBetweenPoints(CGPoint a, CGPoint b) {
+    CGFloat x = (a.x + b.x) / 2.0;
+    CGFloat y = (a.y + b.y) / 2.0;
+    return CGPointMake(x, y);
+}

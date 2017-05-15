@@ -1,0 +1,379 @@
+// !$*UTF8*$!
+{
+	1D3623240D0F684500981E51 /* Test1AppDelegate.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {519, 882}}";
+			sepNavSelRange = "{827, 2}";
+			sepNavVisRange = "{0, 368}";
+			sepNavWindowFrame = "{{425, -62}, {750, 558}}";
+		};
+	};
+	1D3623250D0F684500981E51 /* Test1AppDelegate.m */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1011, 3024}}";
+			sepNavSelRange = "{3622, 0}";
+			sepNavVisRange = "{36, 534}";
+		};
+	};
+	1D6058900D05DD3D006BFB54 /* Test1 */ = {
+		activeExec = 0;
+		executables = (
+			24C79B7E10841CB800750C54 /* Test1 */,
+		);
+	};
+	24B31BF2108E43A700DE5A23 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1D3623250D0F684500981E51 /* Test1AppDelegate.m */;
+		name = "Test1AppDelegate.m: 154";
+		rLen = 0;
+		rLoc = 3622;
+		rType = 0;
+		vrLen = 534;
+		vrLoc = 36;
+	};
+	24B31C1A108E44B200DE5A23 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1D3623250D0F684500981E51 /* Test1AppDelegate.m */;
+		name = "Test1AppDelegate.m: 154";
+		rLen = 0;
+		rLoc = 3622;
+		rType = 0;
+		vrLen = 534;
+		vrLoc = 36;
+	};
+	24C79B7E10841CB800750C54 /* Test1 */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		dylibVariantSuffix = "";
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = Test1;
+		savedGlobals = {
+		};
+		sourceDirectories = (
+		);
+		variableFormatDictionary = {
+		};
+	};
+	24C79B8E10841CC000750C54 /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+		};
+	};
+	24C79B8F10841CC000750C54 /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	24C79BB010843F3700750C54 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1D3623240D0F684500981E51 /* Test1AppDelegate.h */;
+		name = "Test1AppDelegate.h: 12";
+		rLen = 0;
+		rLoc = 307;
+		rType = 0;
+		vrLen = 334;
+		vrLoc = 0;
+	};
+	24C79BB110843F3700750C54 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1D3623250D0F684500981E51 /* Test1AppDelegate.m */;
+		name = "Test1AppDelegate.m: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 412;
+		vrLoc = 0;
+	};
+	24C79C4710844DEE00750C54 /* Test1AppDelegate.m:127 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = 1D3623250D0F684500981E51 /* Test1AppDelegate.m */;
+		functionName = "-updateView";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 127;
+		location = Test1;
+		modificationTime = 277152233.991611;
+		state = 2;
+	};
+	24C79C4B10844E1400750C54 /* Test1AppDelegate.m:67 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = 1D3623250D0F684500981E51 /* Test1AppDelegate.m */;
+		functionName = "-toTrack2:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 67;
+		location = Test1;
+		modificationTime = 277152233.9937011;
+		state = 2;
+	};
+	24C79C5110844E4400750C54 /* Test1AppDelegate.m:138 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = 1D3623250D0F684500981E51 /* Test1AppDelegate.m */;
+		functionName = "-applicationDidFinishLaunching:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 138;
+		location = Test1;
+		modificationTime = 277152233.993802;
+		state = 2;
+	};
+	24C79C5E1084537200750C54 /* Test1AppDelegate.m:186 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = 1D3623250D0F684500981E51 /* Test1AppDelegate.m */;
+		functionName = "-applicationDidFinishLaunching:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 186;
+		location = Test1;
+		modificationTime = 277152233.993883;
+		state = 2;
+	};
+	24C79CA410845AD700750C54 /* Test1AppDelegate.m:161 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = 1D3623250D0F684500981E51 /* Test1AppDelegate.m */;
+		functionName = "-applicationDidFinishLaunching:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 161;
+		location = Test1;
+		modificationTime = 277152233.993971;
+		state = 2;
+	};
+	24C79CA610845AE400750C54 /* Test1AppDelegate.m:156 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = 1D3623250D0F684500981E51 /* Test1AppDelegate.m */;
+		functionName = "-applicationDidFinishLaunching:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 156;
+		location = Test1;
+		modificationTime = 277152233.99405;
+		state = 2;
+	};
+	24C79CAF1084EF6500750C54 /* Test1AppDelegate.m:181 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = 1D3623250D0F684500981E51 /* Test1AppDelegate.m */;
+		functionName = "-applicationDidFinishLaunching:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 181;
+		location = Test1;
+		modificationTime = 277152233.994125;
+		state = 2;
+	};
+	24C79CC21084F07A00750C54 /* Test1AppDelegate.m:72 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = 1D3623250D0F684500981E51 /* Test1AppDelegate.m */;
+		functionName = "-toTrack2:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 72;
+		location = Test1;
+		modificationTime = 277152233.9942001;
+		state = 2;
+	};
+	24C79CD51084F1E700750C54 /* Test1AppDelegate.m:74 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = 1D3623250D0F684500981E51 /* Test1AppDelegate.m */;
+		functionName = "-toTrack2:";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 74;
+		location = Test1;
+		modificationTime = 277152233.994323;
+		state = 2;
+	};
+	24C79CF11084F33600750C54 /* Test1AppDelegate.m:130 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = 1D3623250D0F684500981E51 /* Test1AppDelegate.m */;
+		functionName = "-updateView";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 130;
+		location = Test1;
+		modificationTime = 277152233.994422;
+		state = 2;
+	};
+	24C79D061084F48300750C54 /* Test1AppDelegate.m:129 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = 1D3623250D0F684500981E51 /* Test1AppDelegate.m */;
+		functionName = "-updateView";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 129;
+		location = Test1;
+		modificationTime = 277152233.994506;
+		state = 2;
+	};
+	24C79D0D1084F4BE00750C54 /* Test1AppDelegate.m:130 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = 1D3623250D0F684500981E51 /* Test1AppDelegate.m */;
+		functionName = "-updateView";
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 130;
+		location = Test1;
+		modificationTime = 277152233.9945861;
+		state = 2;
+	};
+	24C79D77108CE4E800750C54 /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 1D3623240D0F684500981E51 /* Test1AppDelegate.h */;
+		name = "Test1AppDelegate.h: 47";
+		rLen = 2;
+		rLoc = 827;
+		rType = 0;
+		vrLen = 368;
+		vrLoc = 0;
+	};
+	29B97313FDCFA39411CA2CEA /* Project object */ = {
+		activeBuildConfigurationName = Debug;
+		activeExecutable = 24C79B7E10841CB800750C54 /* Test1 */;
+		activeTarget = 1D6058900D05DD3D006BFB54 /* Test1 */;
+		addToTargets = (
+			1D6058900D05DD3D006BFB54 /* Test1 */,
+		);
+		breakpoints = (
+			24C79C4710844DEE00750C54 /* Test1AppDelegate.m:127 */,
+			24C79C4B10844E1400750C54 /* Test1AppDelegate.m:67 */,
+			24C79C5110844E4400750C54 /* Test1AppDelegate.m:138 */,
+			24C79C5E1084537200750C54 /* Test1AppDelegate.m:186 */,
+			24C79CA410845AD700750C54 /* Test1AppDelegate.m:161 */,
+			24C79CA610845AE400750C54 /* Test1AppDelegate.m:156 */,
+			24C79CAF1084EF6500750C54 /* Test1AppDelegate.m:181 */,
+			24C79CC21084F07A00750C54 /* Test1AppDelegate.m:72 */,
+			24C79CD51084F1E700750C54 /* Test1AppDelegate.m:74 */,
+			24C79CF11084F33600750C54 /* Test1AppDelegate.m:130 */,
+			24C79D061084F48300750C54 /* Test1AppDelegate.m:129 */,
+			24C79D0D1084F4BE00750C54 /* Test1AppDelegate.m:130 */,
+		);
+		codeSenseManager = 24C79B8F10841CC000750C54 /* Code sense */;
+		executables = (
+			24C79B7E10841CB800750C54 /* Test1 */,
+		);
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					833,
+					20,
+					48,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 277759104;
+			PBXWorkspaceStateSaveDate = 277759104;
+		};
+		perUserProjectItems = {
+			24B31BF2108E43A700DE5A23 /* PBXTextBookmark */ = 24B31BF2108E43A700DE5A23 /* PBXTextBookmark */;
+			24B31C1A108E44B200DE5A23 /* PBXTextBookmark */ = 24B31C1A108E44B200DE5A23 /* PBXTextBookmark */;
+			24C79BB010843F3700750C54 /* PBXTextBookmark */ = 24C79BB010843F3700750C54 /* PBXTextBookmark */;
+			24C79BB110843F3700750C54 /* PBXTextBookmark */ = 24C79BB110843F3700750C54 /* PBXTextBookmark */;
+			24C79D77108CE4E800750C54 /* PBXTextBookmark */ = 24C79D77108CE4E800750C54 /* PBXTextBookmark */;
+		};
+		sourceControlManager = 24C79B8E10841CC000750C54 /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+}

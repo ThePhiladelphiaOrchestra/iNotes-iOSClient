@@ -1,0 +1,137 @@
+//
+//  PlaybackControlViewController.m
+//  Test1
+//
+//  Created by Administrator on 1/27/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import "PlaybackControlViewController.h"
+#import "TrackControlView.h"
+#import "Test1AppDelegate.h"
+
+@implementation PlaybackControlViewController
+
+const CGFloat kWidth = 75.0;
+const CGFloat kHeight = 75.0;
+/*
+ // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
+        // Custom initialization
+    }
+    return self;
+}
+*/
+//- (id) init
+//{
+//	if([super initWithFrame:CGRectMake(0, 0, kWidth, kHeight)]){
+//		
+//	}
+//	
+//	return self;
+//}
+
+
+// Implement loadView to create a view hierarchy programmatically, without using a nib.
+- (void)loadView {
+	
+	CGSize frameSize = CGSizeMake(75, 75);
+	
+	CGRect appFrame = [[UIScreen mainScreen] applicationFrame];
+	UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, 0, frameSize.width, frameSize.height)];
+	//view.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+	view.center = CGPointMake(appFrame.size.height/2, appFrame.size.width/2);
+	//view.center = CGPointMake(400, 200);
+	self.view = view;
+	[view release];
+	
+	UIImage * tempImage = [UIImage imageNamed:@"topAndBottomRow.png"];
+	UIGraphicsBeginImageContext( frameSize );// a CGSize that has the size you want
+	[tempImage drawInRect:CGRectMake(0,0,frameSize.width,frameSize.height)];
+	//image is the original UIImage
+	UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
+	UIGraphicsEndImageContext();
+	
+	backgroundImage = [[UIImageView alloc]initWithImage:newImage];
+	backgroundImage.alpha = 0.5;
+	//[backgroundImage.image.CGImage setAlpha:0.5];
+	[self.view addSubview:backgroundImage];
+	
+	[backgroundImage release];
+	
+	//playPauseButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFastForward target:self action:@selector(playPauseCallback)];
+	playImage = [[[UIImage imageNamed:@"play.png"] stretchableImageWithLeftCapWidth:12.0 topCapHeight:0.0] retain];
+	pauseImage = [[[UIImage imageNamed:@"pause.png"] stretchableImageWithLeftCapWidth:12.0 topCapHeight:0.0] retain];
+
+	playPauseButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 50, 50)];
+	[playPauseButton setImage:pauseImage forState:UIControlStateNormal];
+	[playPauseButton addTarget:self action:@selector(playPauseCallback) forControlEvents:UIControlEventTouchUpInside];
+
+	TrackControlView * tb = [[TrackControlView alloc] initWithFrame:CGRectMake(0, 0, frameSize.width, frameSize.height)];
+	UIBarButtonItem * centerItem = [[UIBarButtonItem alloc] initWithCustomView:playPauseButton];
+	UIBarButtonItem * flexibleSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+	UIBarButtonItem * rewindButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRewind target:self action:nil];
+	UIBarButtonItem * fastForwardButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFastForward target:self action:nil];
+
+
+	tb.backgroundColor = [UIColor clearColor];
+	tb.tintColor = [UIColor clearColor];
+	
+	//NSArray *items = [NSArray arrayWithObjects:flexibleSpace,rewindButton, flexibleSpace,centerItem, flexibleSpace,fastForwardButton,flexibleSpace,nil];
+	NSArray *items = [NSArray arrayWithObjects:flexibleSpace, centerItem, flexibleSpace,nil];
+
+	[tb setItems:items animated:NO];
+	tb.translucent = YES;
+	
+	[self.view addSubview:tb];
+	self.view.backgroundColor = [UIColor clearColor];
+}
+
+- (void) playPauseCallback{
+	//playPauseButton.image = [UIImage imageNamed:@"pause.png"];
+	Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+	if([appDelegate.player isPlaying]){
+		[appDelegate.player pause];
+		[playPauseButton setImage:playImage forState:UIControlStateNormal];
+	}
+	else{
+		[appDelegate.player play];
+		[playPauseButton setImage:pauseImage forState:UIControlStateNormal];
+	}
+}
+
+/*
+// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
+- (void)viewDidLoad {
+    [super viewDidLoad];
+}
+*/
+
+/*
+// Override to allow orientations other than the default portrait orientation.
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    // Return YES for supported orientations
+    return (interfaceOrientation == UIInterfaceOrientationPortrait);
+}
+*/
+
+- (void)didReceiveMemoryWarning {
+	// Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+	
+	// Release any cached data, images, etc that aren't in use.
+}
+
+- (void)viewDidUnload {
+	// Release any retained subviews of the main view.
+	// e.g. self.myOutlet = nil;
+}
+
+
+- (void)dealloc {
+    [super dealloc];
+}
+
+
+@end

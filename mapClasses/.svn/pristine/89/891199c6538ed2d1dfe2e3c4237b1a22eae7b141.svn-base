@@ -1,0 +1,37 @@
+//
+//  BulletView.m
+//  MapDemo
+//
+//  Created by Administrator on 4/26/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import "BulletView.h"
+
+
+@implementation BulletView
+
+
+- (id)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+		self.backgroundColor = [UIColor clearColor];
+        UIImageView * im = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"green_dot.png"]];
+		im.center = CGPointMake(frame.size.width/2, frame.size.height/2);
+		[self addSubview:im];
+		[im release];
+    }
+    return self;
+}
+
+
+- (void)drawRect:(CGRect)rect {
+    // Drawing code
+}
+
+
+- (void)dealloc {
+    [super dealloc];
+}
+
+
+@end

@@ -1,0 +1,555 @@
+//
+//  PathView.m
+//  MapDemo
+//
+//  Created by Administrator on 4/13/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import "PathView.h"
+
+
+@implementation PathView
+
+@synthesize coefficients, dataPoints, cursorTime, drawingPoints, cursor;
+
+- (id)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+		dataPoints = [[NSMutableArray alloc] init];
+		drawingPoints = [[NSMutableArray alloc] init];
+		cursorTime = -50;
+		
+		cursor = [[CursorView alloc] initWithFrame:CGRectMake(-50, -50, 50, 50)];
+		[self addSubview:cursor];
+    }
+    return self;
+}
+
+- (int) closestTime:(float)t {
+	float minTimeDif = 999999.9;
+	int index = 0;
+	for(int i=0; i<[drawingPoints count]; i++) {
+		PathPoint * p = [drawingPoints objectAtIndex:i];
+		float dif = p.t - t;
+		if(fabs(dif) < fabs(minTimeDif)){
+			minTimeDif = dif;
+			index = i;
+		}
+	}
+	
+	return index;
+}
+
+-(void) setCursorTime:(float) time {
+	if([drawingPoints count] != 0){
+
+	
+//		int upperIndex, lowerIndex;
+//	// Interpolate
+//	if(minTimeDif > 0) {
+//		lowerIndex = index;
+//		upperIndex = index + 1;
+//	}
+//	else{
+//		lowerIndex = index - 1;
+//		upperIndex = index;
+//	}
+		int index = [self closestTime:time];
+	
+		PathPoint * closest = [drawingPoints objectAtIndex:index];
+		
+		[UIView beginAnimations:nil context:nil]; // begins animation block
+		[UIView setAnimationDuration:0.3];        // sets animation duration
+		[UIView setAnimationDelegate:self];        // sets delegate for this block
+		//[UIView setAnimationDidStopSelector:@selector(animationFinished:finished:context:)];
+		cursor.center = CGPointMake(closest.x, closest.y);
+		[UIView commitAnimations]; 
+	}
+	else if(time < 0){
+		cursor.center = CGPointMake(-1000, -1000);
+	}
+	
+}
+
+-(void) calculatePath {
+	// Drawing code
+	
+	//	CGContextRef c = UIGraphicsGetCurrentContext();
+	//	CGContextClearRect(c, self.frame);
+	//	//	
+	//	// set color
+	//	CGFloat color[4] = {1.0, 0.0, 0.0, 1.0f};
+	//	CGContextSetStrokeColor(c, color);
+	//	CGContextBeginPath(c);
+	//	
+	//	int order = [coefficients count];
+	//	
+	//	float prevY = 0.0f;
+	//	
+	//	printf("----------------------The Data----------------------\n");
+	//	for ( int i=0 ; i < 480; i ++){
+	//		float y = 0.0f;
+	//		for(int j = order-1; j >= 0; j--){
+	//			float sum = 1.0;
+	//			for(int k = 0; k < j; k++){
+	//				sum *= i;
+	//			}
+	//			y += [[coefficients objectAtIndex:j] floatValue]*sum;
+	//		}
+	//		
+	//		if (i!=0){
+	//			CGContextMoveToPoint(c,i-1,prevY);
+	//			CGContextAddLineToPoint(c,i,y);
+	//		}
+	//		printf("%f\n",y);
+	//		prevY = y;
+	//	}
+	//	printf("End Data");
+	//
+	//	CGContextStrokePath(c);
+	
+	NSMutableArray * interpDataPoints = [[NSMutableArray alloc] init];
+	
+	int space = 0;
+	
+	for ( int i = 0; i < [dataPoints count] - 1; i ++){
+		[interpDataPoints addObject:[NSValue valueWithCGPoint:((MarkerView *)[dataPoints objectAtIndex:i]).location]];
+		
+		CGPoint first = ((MarkerView *)[dataPoints objectAtIndex:i]).location;
+		CGPoint second = ((MarkerView *)[dataPoints objectAtIndex:i+1]).location;
+		
+		//CGPoint midPoint1 = CGPointMake(first.x + space, first.y);
+		space = -space;
+		CGPoint midPoint2 = CGPointMake((first.x + second.x)/2.0 + space, (first.y + second.y)/2.0 + space );
+
+		//		CGPoint midPoint1 = CGPointMake(first.x + (second.x - first.x)*amt, first.y + (second.y - first.y)*amt);
+		//		CGPoint midPoint2 = CGPointMake(first.x + (second.x - first.x)*(1-amt), first.y + (second.y - first.y)*(1-amt));
+		
+		//[interpDataPoints addObject:[NSValue valueWithCGPoint:midPoint1]];
+		[interpDataPoints addObject:[NSValue valueWithCGPoint:midPoint2]];
+		
+	}
+	[interpDataPoints addObject:[NSValue valueWithCGPoint:((MarkerView *)[dataPoints objectAtIndex:[dataPoints count]-1]).location]];
+	
+	
+//	CGContextRef c = UIGraphicsGetCurrentContext();
+//	CGContextClearRect(c, self.frame);
+//	//	
+//	// set color
+//	CGFloat colorStroke[4] = {1.0, 0.0, 0.0, 0.7f};
+//	CGFloat colorFill[4] = {1.0, 0.0, 0.0, 1.0f};
+//	
+//	CGContextSetStrokeColor(c, colorStroke);
+//	CGContextSetFillColor(c, colorFill);
+	
+	float prevY = 0.0f;
+	float prevX = 0.0f;
+	
+	NSMutableArray * firstControlPoints = [[NSMutableArray alloc] init];
+	NSMutableArray * secondControlPoints = [[NSMutableArray alloc] init];
+	
+	[self GetCurveControlPoints:interpDataPoints :firstControlPoints :secondControlPoints];
+	
+	//	for(int i = 0; i < [interpDataPoints count]; i++){
+	//		CGPoint P = [(NSValue *)[interpDataPoints objectAtIndex:i] CGPointValue];;
+	//		
+	//		float x = P.x;
+	//		float y = P.y;
+	//		
+	//		if(i!=0){
+	//			CGContextMoveToPoint(c,prevX,prevY);
+	//			CGContextAddLineToPoint(c,x,y);
+	//		}
+	//		
+	//		prevX = x;
+	//		prevY = y;
+	//	}
+	//	
+	//	CGContextStrokePath(c);
+	
+	//	CGFloat color1[4] = {0.0, 1.0, 0.0, 1.0f};
+	//	CGContextSetStrokeColor(c, color1);
+	//	
+	//	for(int i = 0; i < [firstControlPoints count]; i++){
+	//		CGPoint P = [((NSValue *)[firstControlPoints objectAtIndex:i]) CGPointValue];
+	//		
+	//		float x = P.x;
+	//		float y = P.y;
+	//		
+	//		if(i!=0){
+	//			CGContextMoveToPoint(c,prevX,prevY);
+	//			CGContextAddLineToPoint(c,x,y);
+	//		}
+	//		
+	//		prevX = x;
+	//		prevY = y;
+	//	}
+	//	
+	//	CGContextStrokePath(c);
+	//	
+	//	CGFloat color2[4] = {0.0, 0.0, 1.0, 1.0f};
+	//	CGContextSetStrokeColor(c, color2);
+	//	
+	//	for(int i = 0; i < [secondControlPoints count]; i++){
+	//		CGPoint P = [((NSValue *)[secondControlPoints objectAtIndex:i]) CGPointValue];
+	//		
+	//		float x = P.x;
+	//		float y = P.y;
+	//		
+	//		if(i!=0){
+	//			CGContextMoveToPoint(c,prevX,prevY);
+	//			CGContextAddLineToPoint(c,x,y);
+	//		}
+	//		
+	//		prevX = x;
+	//		prevY = y;
+	//	}
+	//	
+	//	CGContextStrokePath(c);
+	
+//	CGContextSetLineWidth(c, 2.0);
+	
+	NSMutableArray * coef = [[NSMutableArray alloc] init];
+	
+	for(int i = 0; i < 4; i ++){
+		long long u = [self choose:3 :i];
+		[coef addObject:[NSNumber numberWithLongLong:u]];
+		
+	}
+	
+	float numTimeSteps = 20;
+	
+	for(int k = 0; k < [interpDataPoints count]-1; k ++){
+		
+		for ( int i=0 ; i < numTimeSteps; i ++){
+			double t = (double)i/(numTimeSteps - 1);
+			
+			float x = 0.0f;
+			float y = 0.0f;
+			
+			for(int j = 0; j < 4; j ++){
+				double tt = 0.0;
+				
+				
+				long long co = [((NSNumber *)[coef objectAtIndex:(j)%4]) longLongValue];
+				CGPoint P; 
+				int index;
+				
+				if ( j == 0){
+					
+					//P = ((MarkerView *)[dataPoints objectAtIndex:k]).location;
+					P = [((NSValue *)[interpDataPoints objectAtIndex: k]) CGPointValue];
+				}
+				else if(j %3 == 1){
+					index = (int)(((float)k+j-1)/3.0);
+					P = [((NSValue *)[firstControlPoints objectAtIndex: k]) CGPointValue];
+				}
+				else if(j%3 == 2){
+					index = (int)(((float)k+j-2)/3.0);
+					
+					P = [((NSValue *)[secondControlPoints objectAtIndex:k]) CGPointValue];
+				}
+				else if ( j == 3){
+					
+					//P = ((MarkerView *)[dataPoints objectAtIndex:k+1]).location;
+					P = [((NSValue *)[interpDataPoints objectAtIndex: k+1]) CGPointValue];
+					
+				}
+				
+				
+				tt = pow(t, j) * pow(1-t, 3 - j);
+				
+				x += P.x * tt * co;
+				y += P.y * tt * co;
+				
+			}
+			
+			
+			PathPoint * p = [[PathPoint alloc] init];
+			p.x = x;
+			p.y = y;
+			int index = (int)((float)k/2.0);
+			float time = ((MarkerView *)[dataPoints objectAtIndex:index + 1]).time;
+			float prevTime = (index == 0 ? 0 : ((MarkerView *)[dataPoints objectAtIndex:index]).time);
+			float frac = (i + (k % 2)*((float)numTimeSteps))/((float)numTimeSteps * 2);
+			p.t = frac*(time - prevTime) + prevTime;
+			
+			[drawingPoints addObject: p];
+			[p release];
+			
+			prevY = y;
+			prevX = x;
+		}
+		
+		
+	}
+	printf("End Data");
+	[coef release];
+	
+//	CGContextStrokePath(c);
+	
+	
+	// Draw big dots around the start and end
+//	float dotSize = 15.0;
+//	float smallDotSize = 7.0f;
+//	
+//	CGPoint startPoint = [((NSValue *)[interpDataPoints objectAtIndex:0]) CGPointValue];
+//	CGPoint endPoint = [((NSValue *)[interpDataPoints objectAtIndex:[interpDataPoints count]-1]) CGPointValue];
+//	
+//	CGContextFillEllipseInRect(c, CGRectMake(startPoint.x - dotSize/2.0, 
+//											 startPoint.y - dotSize/2.0,
+//											 dotSize, 
+//											 dotSize));
+//	CGContextFillEllipseInRect(c, CGRectMake(endPoint.x - dotSize/2.0, 
+//											 endPoint.y - dotSize/2.0,
+//											 dotSize, 
+//											 dotSize));
+//	
+
+	
+	[interpDataPoints release];
+	[firstControlPoints release];
+	[secondControlPoints release];
+}
+
+- (void)drawRect:(CGRect)rect {
+
+	if([drawingPoints count] != 0){
+		CGContextRef c = UIGraphicsGetCurrentContext();
+		CGContextClearRect(c, self.frame);
+		//	
+		// set color
+		CGFloat pathFillColor[4] = {0.953f, 0.718f, 0.251f, 1.0f};
+		CGFloat pathOutlineColor[4] = {0.671f, 0.635f, 0.553f, 1.0f};
+		CGFloat colorFill[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+		
+		float dotSize = 20.0 + 2.0f;
+		float dotOutlineSize = dotSize + 3.0f;
+		float smallDotSize = 12.0f;
+		float smallDotOutlineSize = smallDotSize + 3.0f;
+		float pathSize = 6.0f;
+		float pathOutlineSize = pathSize + 2.0f;
+		
+		// First draw path outline
+		CGContextSetStrokeColor(c, pathOutlineColor);
+		CGContextSetFillColor(c, pathOutlineColor);
+		CGContextSetLineWidth(c, pathOutlineSize);
+
+		PathPoint * startPoint = [drawingPoints objectAtIndex:0];
+		PathPoint * endPoint = [drawingPoints objectAtIndex:[drawingPoints count]-1];
+		
+		CGContextFillEllipseInRect(c, CGRectMake(startPoint.x - dotOutlineSize/2.0, 
+												 startPoint.y - dotOutlineSize/2.0,
+												 dotOutlineSize, 
+												 dotOutlineSize));
+		CGContextFillEllipseInRect(c, CGRectMake(endPoint.x - dotOutlineSize/2.0, 
+												 endPoint.y - dotOutlineSize/2.0,
+												 dotOutlineSize, 
+												 dotOutlineSize));
+		float prevX = 0.0f;
+		float prevY = 0.0f;
+
+		CGContextBeginPath(c);
+		for(int i=0; i<[drawingPoints count]; i++){
+			PathPoint * dot = [drawingPoints objectAtIndex: i];
+			
+				if(i!=0){
+					CGContextMoveToPoint(c,prevX,prevY);
+					CGContextAddLineToPoint(c,dot.x,dot.y);
+				}
+			prevX = dot.x;
+			prevY = dot.y;
+		}
+		
+		CGContextStrokePath(c);
+			
+		for(int i=0; i<[dataPoints count]; i++){
+				CGPoint dot = ((MarkerView *)[dataPoints objectAtIndex: i]).location;
+				CGContextFillEllipseInRect(c, CGRectMake(dot.x - smallDotOutlineSize/2.0, 
+														 dot.y - smallDotOutlineSize/2.0,
+														 smallDotOutlineSize, 
+														 smallDotOutlineSize));
+		}
+		
+		// Now draw path
+		CGContextSetStrokeColor(c, pathFillColor);
+		CGContextSetFillColor(c, colorFill);
+		CGContextSetLineWidth(c, pathSize);
+		
+		startPoint = [drawingPoints objectAtIndex:0];
+		endPoint = [drawingPoints objectAtIndex:[drawingPoints count]-1];
+		
+		CGContextFillEllipseInRect(c, CGRectMake(startPoint.x - dotSize/2.0, 
+												 startPoint.y - dotSize/2.0,
+												 dotSize, 
+												 dotSize));
+		CGContextFillEllipseInRect(c, CGRectMake(endPoint.x - dotSize/2.0, 
+												 endPoint.y - dotSize/2.0,
+												 dotSize, 
+												 dotSize));
+		prevX = 0.0f;
+		prevY = 0.0f;
+		
+		CGContextBeginPath(c);
+		for(int i=0; i<[drawingPoints count]; i++){
+			PathPoint * dot = [drawingPoints objectAtIndex: i];
+			
+			if(i!=0){
+				CGContextMoveToPoint(c,prevX,prevY);
+				CGContextAddLineToPoint(c,dot.x,dot.y);
+			}
+			prevX = dot.x;
+			prevY = dot.y;
+		}
+		
+		CGContextStrokePath(c);
+		
+		for(int i=0; i<[dataPoints count]; i++){
+			CGPoint dot = ((MarkerView *)[dataPoints objectAtIndex: i]).location;
+			CGContextFillEllipseInRect(c, CGRectMake(dot.x - smallDotSize/2.0, 
+													 dot.y - smallDotSize/2.0,
+													 smallDotSize, 
+													 smallDotSize));
+		}
+		
+	}
+
+}
+
+-(long long) choose:(unsigned) n : (unsigned) k {
+    if (k > n)
+        return 0;
+	
+    if (k > n/2)
+        k = n-k; // Take advantage of symmetry
+	
+    long double accum = 1;
+    unsigned i;
+    for (i = 1; i <= k; i++)
+		accum = accum * (n-k+i) / i;
+	
+    return accum + 0.5; // avoid rounding error
+}
+
+-(void) GetCurveControlPoints:(NSMutableArray *) knots
+							 :(NSMutableArray *) firstControlPoints
+							 :(NSMutableArray *) secondControlPoints {
+	
+	int n = [knots count] - 1;
+	//	if (n < 1)
+	//		throw new ArgumentException
+	//		("At least two knot points required", "knots");
+	//	if (n == 1)
+	//	{ // Special case: Bezier curve should be a straight line.
+	//		firstControlPoints = new Point[1];
+	//		// 3P1 = 2P0 + P3
+	//		firstControlPoints[0].X = (2 * knots[0].X + knots[1].X) / 3;
+	//		firstControlPoints[0].Y = (2 * knots[0].Y + knots[1].Y) / 3;
+	//		
+	//		secondControlPoints = new Point[1];
+	//		// P2 = 2P1 – P0
+	//		secondControlPoints[0].X = 2 *
+	//		firstControlPoints[0].X - knots[0].X;
+	//		secondControlPoints[0].Y = 2 *
+	//		firstControlPoints[0].Y - knots[0].Y;
+	//		return;
+	//	}
+	
+	// Calculate first Bezier control points
+	// Right hand side vector
+	double * rhs = (double *) malloc(n*sizeof(double));
+	
+	// Set right hand side X values
+	for (int i = 1; i < n - 1; ++i){
+		//		CGPoint P = ((MarkerView *)[knots objectAtIndex:i]).location;
+		//		CGPoint P1 = ((MarkerView *)[knots objectAtIndex:i+1]).location;
+		CGPoint P = [((NSValue *)[knots objectAtIndex: i]) CGPointValue];
+		CGPoint P1 = [((NSValue *)[knots objectAtIndex: i+1]) CGPointValue];
+		
+		rhs[i] = 4 * P.x + 2 * P1.x;
+	}
+	
+	//	CGPoint P0 = ((MarkerView *)[knots objectAtIndex:0]).location;
+	//	CGPoint P1 = ((MarkerView *)[knots objectAtIndex:1]).location;	
+	//	
+	//	CGPoint Pn1 = ((MarkerView *)[knots objectAtIndex:n-1]).location;
+	//	CGPoint Pn = ((MarkerView *)[knots objectAtIndex:n]).location;
+	
+	CGPoint P0 = [((NSValue *)[knots objectAtIndex:0]) CGPointValue];
+	CGPoint P1 = [((NSValue *)[knots objectAtIndex:1]) CGPointValue];	
+	
+	CGPoint Pn1 =[((NSValue *)[knots objectAtIndex: n-1]) CGPointValue];
+	CGPoint Pn = [((NSValue *)[knots objectAtIndex: n]) CGPointValue];
+	
+	rhs[0] = P0.x + 2 * P1.x;
+	rhs[n - 1] = (8 * Pn1.x + Pn.x) / 2.0;
+	// Get first control points X-values
+	double * x = [self GetFirstControlPoints:rhs :n];
+	
+	// Set right hand side Y values
+	for (int i = 1; i < n - 1; ++i){
+		//		CGPoint P = ((MarkerView *)[knots objectAtIndex:i]).location;
+		//		CGPoint P1 = ((MarkerView *)[knots objectAtIndex:i+1]).location;
+		
+		CGPoint P = [((NSValue *)[knots objectAtIndex: i]) CGPointValue];
+		CGPoint P1 = [((NSValue *)[knots objectAtIndex: i+1]) CGPointValue];
+		
+		rhs[i] = 4 * P.y + 2 * P1.y;
+	}
+	
+	rhs[0] = P0.y + 2 * P1.y;
+	rhs[n - 1] = (8 * Pn1.y + Pn.y) / 2.0;
+	// Get first control points Y-values
+	double * y = [self GetFirstControlPoints:rhs :n];
+	
+	// Fill output arrays.
+	for (int i = 0; i < n; ++i)
+	{
+		// First control point
+		[firstControlPoints addObject:[NSValue valueWithCGPoint:CGPointMake(x[i], y[i])]];
+		// Second control point
+		//		CGPoint P = ((MarkerView *)[knots objectAtIndex:i+1]).location;
+		
+		CGPoint P = [((NSValue *)[knots objectAtIndex: i+1]) CGPointValue];
+		
+		if (i < n - 1){
+			[secondControlPoints addObject:[NSValue valueWithCGPoint:CGPointMake(2 * P.x - x[i + 1], 
+																				 2 * P.y - y[i + 1])]];
+		}
+		else{
+			[secondControlPoints addObject:[NSValue valueWithCGPoint:CGPointMake((Pn.x + x[n - 1]) / 2,
+																				 (Pn.y + y[n - 1]) / 2)]];
+		}
+	}
+}
+
+
+-(double *) GetFirstControlPoints:(double *) rhs :(int) n
+{
+	double * x = (double *)malloc(n*sizeof(double)); // Solution vector.
+	double * tmp = (double *)malloc(n*sizeof(double)); // Temp workspace.
+	
+	double b = 2.0;
+	x[0] = rhs[0] / b;
+	for (int i = 1; i < n; i++) // Decomposition and forward substitution.
+	{
+		tmp[i] = 1 / b;
+		// 4.0 , 3.5 for good curves
+		b = (i < n - 1 ? 4.0 : 3.5) - tmp[i];
+		x[i] = (rhs[i] - x[i - 1]) / b;
+	}
+	for (int i = 1; i < n; i++)
+		x[n - i - 1] -= tmp[n - i] * x[n - i]; // Backsubstitution.
+	
+	free(tmp);
+	
+	return x;
+}
+
+
+- (void)dealloc {
+    [super dealloc];
+}
+
+
+@end

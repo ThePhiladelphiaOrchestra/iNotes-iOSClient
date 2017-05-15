@@ -1,0 +1,104 @@
+//
+//  Test1AppDelegate.m
+//  Test1
+//
+//  Created by MattP Senior Design 2009 on 10/12/09.
+//  Copyright __MyCompanyName__ 2009. All rights reserved.
+//
+
+#import "Test1AppDelegate.h"
+#import "BufferedSocket.h"
+@implementation Test1AppDelegate
+
+@synthesize window, glossary, glossaryTerms, TEXT_SIZE,OFFLINE_FILE,CURRENT_DATA;
+@synthesize splashViewController, mode, player;
+@synthesize CURRENT_MEASURE, TOTAL_MEASURES, CURRENT_PIECE, CURRENT_TRACK,USE_SLIDE_FORMAT;
+@synthesize SERVER_ADDRESS,DEFAULT_SERVER_ADDRESS, CONNECTED_TO_SERVER, APPLICATION_STARTED, LIVE;
+
+
+- (void)applicationDidFinishLaunching:(UIApplication *)application {    
+
+	[[UIApplication sharedApplication] setStatusBarHidden:YES animated:NO];
+	
+	glossaryTerms = [[NSMutableArray alloc] init];
+	DEFAULT_SERVER_ADDRESS = @"music.ece.drexel.edu";
+	//DEFAULT_SERVER_ADDRESS = @"192.168.1.102";
+	//DEFAULT_SERVER_ADDRESS = @"10.0.1.196";
+	//DEFAULT_SERVER_ADDRESS = @"144.118.51.224";
+	//DEFAULT_SERVER_ADDRESS = @"129.25.12.46";
+	
+	TEXT_SIZE = 15;
+	
+	CURRENT_MEASURE = 0;
+	TOTAL_MEASURES = 0;
+	CURRENT_PIECE = nil;
+	CURRENT_TRACK = nil;
+	CONNECTED_TO_SERVER = FALSE;
+	APPLICATION_STARTED = FALSE;
+	OFFLINE_FILE = @"June8th";
+	LIVE = TRUE;
+	
+//	NSString * temp1 = [[NSUserDefaults standardUserDefaults] stringForKey:@"serverAddress"];
+//	NSString * newString = [[NSString alloc] initWithFormat:@"%@",temp1];
+//	if(newString && ![newString isEqualToString:@"(null)"])
+//		self.SERVER_ADDRESS = newString;
+//	else
+	self.SERVER_ADDRESS = DEFAULT_SERVER_ADDRESS;
+	
+	splashViewController = [[SplashViewController alloc] init];
+	glossary = [[GlossaryViewController alloc] init];
+    // Override point for customization after app launch 
+
+    [window addSubview:[splashViewController view]];
+	[window makeKeyAndVisible];
+	
+	
+}
+
+- (void) setSong:(NSString *)fileName {
+	
+	if(player){
+		if(player.playing)
+			[player stop];
+		
+		[player release];
+	}
+	
+	NSArray * parts = [fileName componentsSeparatedByString: @"."];
+	[parts retain];
+	if([parts count] == 2){
+		NSURL *fileURL = [[NSURL alloc] initFileURLWithPath: [[NSBundle mainBundle] pathForResource:[parts objectAtIndex:0] ofType:[parts objectAtIndex:1]]];
+		player = [[AVAudioPlayer alloc] initWithContentsOfURL:fileURL error:nil];
+		[player play];
+	}
+	
+
+}
+
+- (void)applicationWillTerminate:(UIApplication *)application {
+	printf("Application closing");
+	
+//	NSString * notesString = [[splashViewController.notesViewController notesTextView] text];
+//	[notesString retain];
+//	[[NSUserDefaults standardUserDefaults] setObject:[[splashViewController.notesViewController notesTextView] text] forKey:@"notes"];
+//	[[NSUserDefaults standardUserDefaults] synchronize];
+//	
+//	NSString * ns = [[NSUserDefaults standardUserDefaults] objectForKey:@"notes"];
+
+	
+	//[notesString release];
+	
+	[splashViewController.mainViewController closeConnection];
+	
+}
+
+
+
+- (void)dealloc {
+	[splashViewController release];
+    [window release];
+    [super dealloc];
+}
+
+@end
+

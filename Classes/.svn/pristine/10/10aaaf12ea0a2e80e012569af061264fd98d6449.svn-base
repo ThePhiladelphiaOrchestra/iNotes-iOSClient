@@ -1,0 +1,24 @@
+//
+//  RootViewController.h
+//  Test1
+//
+//  Created by Administrator on 12/14/09.
+//  Copyright 2009 Drexel University. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+
+#define HORIZ_SWIPE_DRAG_MIN  12
+#define VERT_SWIPE_DRAG_MAX    4
+
+@interface NotesViewController : UIViewController {
+
+	UITextView * notesTextView;
+	UIImageView * backGroundImage;
+	CGPoint startTouchPosition;
+
+}
+
+@property (retain) UITextView *notesTextView;
+
+@end

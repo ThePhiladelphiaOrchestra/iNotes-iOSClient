@@ -1,0 +1,141 @@
+//
+//  GlossaryItemView.m
+//  Untitled
+//
+//  Created by Administrator on 2/8/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import "GlossaryItemView.h"
+#import <QuartzCore/CoreAnimation.h>
+
+
+@implementation GlossaryItemView
+
+@synthesize glossaryItem;
+
+//+(Class)layerClass
+//{
+//	return [CATiledLayer class];
+//}
+
+- (id)initWithFrame:(CGRect)frame {
+    if (self = [super initWithFrame:frame]) {
+//		CATiledLayer *animLayer = (CATiledLayer *) self.layer;
+//		animLayer.levelsOfDetailBias = 4;
+//		animLayer.levelsOfDetail = 4;
+		
+		UIImageView * backGroundImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"loadingContent.png"]];
+		backGroundImageView.transform = CGAffineTransformMakeRotation(M_PI / 2.0);
+		//	backGroundImageView.frame = CGRectMake(-20, -50, appFrame.size.height + 50, appFrame.size.width + 55);
+		backGroundImageView.frame = frame;
+		
+		[self addSubview:backGroundImageView];
+		[backGroundImageView release];
+		
+		self.backgroundColor = [UIColor clearColor];
+		self.autoresizingMask = UIViewAutoresizingFlexibleHeight;
+
+		title = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, frame.size.width, 50)];
+		title.backgroundColor = [UIColor clearColor];
+		title.font = [UIFont boldSystemFontOfSize:28];
+		title.textColor = [UIColor whiteColor];
+
+		UILabel * descriptionLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, title.frame.size.height, 200, 30)];
+		[descriptionLabel setFont: [UIFont systemFontOfSize:20]];
+		descriptionLabel.backgroundColor = [UIColor clearColor];
+		descriptionLabel.text = @"Description";
+		descriptionLabel.textColor = [UIColor whiteColor];
+
+		description = [[UITextView alloc] initWithFrame:CGRectMake(0, 
+																   descriptionLabel.frame.origin.y + descriptionLabel.frame.size.height,
+																   frame.size.width, 200)];
+		description.backgroundColor = [UIColor clearColor];
+		description.userInteractionEnabled = NO;
+		description.autoresizesSubviews = YES;
+		description.font = [UIFont systemFontOfSize:16.0f];
+		description.textColor = [UIColor whiteColor];
+
+		
+		historyLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, description.frame.size.height + description.frame.origin.y, 100, 30)];
+		[historyLabel setFont: [UIFont systemFontOfSize:20]];
+		historyLabel.backgroundColor = [UIColor clearColor];
+		historyLabel.text = @"History";
+		historyLabel.textColor = [UIColor whiteColor];
+
+		history = [[UITextView alloc] initWithFrame:CGRectMake(0, 
+																   historyLabel.frame.origin.y + historyLabel.frame.size.height,
+																   frame.size.width, 200)];
+		history.autoresizesSubviews = YES;
+		history.userInteractionEnabled = NO;
+		history.backgroundColor = [UIColor clearColor];
+		[history setFont: [UIFont systemFontOfSize:16]];
+		history.textColor = [UIColor whiteColor];
+
+		[self addSubview:title];
+		[self addSubview:descriptionLabel];
+		[self addSubview:description];
+		[self addSubview:historyLabel];
+		[self addSubview:history];
+    }
+    return self;
+}
+
+- (void) setGlossaryItem:(GlossaryItem *) theItem {
+		
+	title.text = theItem.name;
+
+
+	description.text = theItem.description;
+	
+	if(![theItem.history isEqualToString:@""]){
+		historyLabel.text = @"History";
+	}
+	else{
+		historyLabel.text = @"";
+	}
+
+	history.text = theItem.history;
+
+	[self layoutSubviews];
+	
+}
+
+-(void) layoutSubviews {
+	[super layoutSubviews];
+	
+	description.frame = CGRectMake(0, 
+							   description.frame.origin.y,
+							   self.frame.size.width, 200);
+	
+	// resize description text field
+	CGRect frame = description.frame;
+	frame.size.height = [description contentSize].height;
+	description.frame = frame;
+	
+	
+	historyLabel.frame = CGRectMake(0, description.frame.size.height + description.frame.origin.y, 100, 30);
+	history.frame = CGRectMake(0, 
+							   historyLabel.frame.origin.y + historyLabel.frame.size.height,
+							   self.frame.size.width, 200);
+	
+	// resize history text field
+	frame = history.frame;
+	frame.size.height = [history contentSize].height;
+	history.frame = frame;
+	
+}
+
+
+
+- (void)drawRect:(CGRect)rect {
+    // Drawing code
+}
+
+
+- (void)dealloc {
+    [super dealloc];
+}
+
+
+@end

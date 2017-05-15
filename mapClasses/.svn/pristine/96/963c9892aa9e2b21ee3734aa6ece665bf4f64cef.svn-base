@@ -1,0 +1,35 @@
+//
+//  MapScrollView.h
+//  MapDemo
+//
+//  Created by Administrator on 4/6/10.
+//  Copyright 2010 Drexel University. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+#import "MarkerView.h"
+#import "PageView.h"
+#import "CallOutView.h"
+
+#define TOOLBAR_HEIGHT 30
+
+#define ZOOM_IN_AMOUNT		8.0
+#define FIRST_LEVEL_ZOOM	1.5
+
+@interface MapScrollView : UIScrollView {
+    CGPoint tapLocation;         // Needed to record location of single tap, which will only be registered after delayed perform.
+    BOOL multipleTouches;        // YES if a touch event contains more than one touch; reset when all fingers are lifted.
+    BOOL twoFingerTapIsPossible; // Set to NO when 2-finger tap can be ruled out (e.g. 3rd finger down, fingers touch down too far apart, etc).
+	BOOL zoomedIn;
+	
+	MarkerView * selectedPage;
+	CallOutView * callout;
+
+	PageViewController * thePageViewController;
+}
+
+@property (nonatomic, assign) BOOL zoomedIn;
+@property (nonatomic, retain) PageViewController * thePageViewController;
+@property (nonatomic, retain) CallOutView * callout;
+
+@end

@@ -1,0 +1,146 @@
+#import "WebOverlayView.h"
+#import "Test1AppDelegate.h"
+#import "GlossaryViewController.h"
+
+@implementation WebOverlayView
+
+@synthesize webViewComposite;
+@synthesize delegate;
+@synthesize timer;
+
+#pragma mark -
+#pragma mark NSObject
+
+
+
+- (void)dealloc {
+    [webViewComposite release];
+    [delegate release];
+    [timer invalidate];
+    [super dealloc];
+}
+
+#pragma mark -
+#pragma mark WebOverlayView
+
+- (UIView *)findViewToHitForTouches:(NSSet *)touches
+						  withEvent:(UIEvent *)event
+							 inView:(UIView *)v {
+    UITouch *touch = [touches anyObject];
+    CGPoint pt = [touch locationInView:v];
+	
+	
+    return [v hitTest:pt withEvent:event];
+}
+
+- (UIView *)findViewToHitForTouches:(NSSet *)touches withEvent:(UIEvent *)event {
+    return [self findViewToHitForTouches:touches withEvent:event inView:webViewComposite];
+}
+
+- (void)timerFired:(NSTimer *)t {
+    timer = nil;
+    if (didShouldStartLoadViewRequestGetCalled == NO)
+        [delegate tappedView];
+}
+
+#pragma mark -
+#pragma mark UIView
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    [[self findViewToHitForTouches:touches withEvent:event] touchesBegan:touches withEvent:event];
+    didMove = NO;
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+    [[self findViewToHitForTouches:touches withEvent:event] touchesMoved:touches withEvent:event];
+    didMove = YES;
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+    [[self findViewToHitForTouches:touches withEvent:event] touchesEnded:touches withEvent:event];
+    if (didMove == NO) {
+		[timer invalidate]; 
+		didShouldStartLoadViewRequestGetCalled = NO;
+		timer = [NSTimer scheduledTimerWithTimeInterval:2.0
+												 target:self
+											   selector:@selector(timerFired:)
+											   userInfo:nil repeats:NO];
+    }
+}
+
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+    [[self findViewToHitForTouches:touches withEvent:event] touchesCancelled:touches withEvent:event];
+    didMove = YES;
+}
+
+#pragma mark -
+#pragma mark UIWebViewDelegate
+
+- (void)webViewDidStartLoad:(UIWebView *)webView {
+    [delegate webViewDidStartLoad:webView];
+}
+
+- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request
+ navigationType:(UIWebViewNavigationType)navigationType {
+    didShouldStartLoadViewRequestGetCalled = YES;
+    //return [delegate webView:webView shouldStartLoadWithRequest:request navigationType:navigationType];
+	
+	NSString *path = [[request URL] path];
+	NSLog(path);
+	
+	NSString * linkText = [path lastPathComponent];
+	NSLog(linkText);
+	
+	switch (navigationType) {
+		case UIWebViewNavigationTypeLinkClicked:
+			printf("UIWebViewNavigationTypeLinkClicked");
+			break;
+		case UIWebViewNavigationTypeFormSubmitted:
+			printf("UIWebViewNavigationTypeFormSubmitted");
+			break;
+		case UIWebViewNavigationTypeBackForward:
+			printf("UIWebViewNavigationTypeBackForward");
+			break;
+		case UIWebViewNavigationTypeFormResubmitted:
+			printf("UIWebViewNavigationTypeFormResubmitted");
+			break;
+		case UIWebViewNavigationTypeReload:
+			printf("UIWebViewNavigationTypeReload");
+			break;
+		case UIWebViewNavigationTypeOther:
+			printf("UIWebViewNavigationTypeOther");
+			break;
+	}
+	
+	if(navigationType == UIWebViewNavigationTypeLinkClicked){
+		printf("Link clicked: %@ \n", linkText);
+		
+		Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+		GlossaryViewController * glossary = appDelegate.glossary;
+		glossary.navigationItem.title = linkText;
+		
+		//[appDelegate.splashViewController.mainViewController fadeTabBar];
+		[glossary goToPage:linkText];
+		
+		[appDelegate.splashViewController.mainViewController.trackTabBar.navigationController pushViewController:glossary animated:YES];
+		
+		[glossary.view setNeedsLayout];
+		[glossary.view setNeedsDisplay];
+		
+		return YES;
+	}
+	else{
+		return YES;
+	}
+}
+
+- (void)webViewDidFinishLoad:(UIWebView *)webView {
+	
+    //[delegate webViewDidFinishLoad:webView];
+}
+
+- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
+    //[delegate webView:webView didFailLoadWithError:error];
+}
+
+@end

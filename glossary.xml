@@ -1,0 +1,319 @@
+<?xml version="1.0"?>
+<glossary>
+  <item name="adagio" category="Tempo">
+    <description>In a slow tempo, usually considered to be slower than andante but faster than larghetto. Used chiefly as a direction.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="allegro" category="Tempo">
+    <description>In a quick, lively tempo, usually considered to be faster than allegretto but slower than presto. Used chiefly as a direction.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="arco pizzicato" category="Style">
+    <description>In music notation, a composer will normally indicate the performer should use pizzicato with the abbreviation pizz. A return to bowing is indicated by the Italian term arco.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="attacca" category="Music Theory">
+    <description>Attack at once; -- a direction at the end of a movement to show that the next is to follow immediately, without any pause.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="bassoon" category="Instruments">
+    <description>A low-pitched woodwind instrument with a double reed, having a long wooden body attached to a U-shaped lateral tube that leads to the mouthpiece. The range of this instrument is typically two octaves lower than that of the oboe.</description>
+    <history>The bassoon developed from the older curtal (or dulzian) in the 17th century. An agile instrument with a mild tone, it has a range of 3 1/2 octaves, starting at B-flat two octaves below middle C. </history>
+    <image></image>
+  </item>
+  <item name="binary" category="Music Theory">
+    <description>Binary form is a way of structuring a piece of music in two related sections, both of which are usually repeated. Binary is also a structure used to choreograph dance. Binary form was popular in the Baroque period, often used to structure movements from sonatas for keyboard instruments. It was also used for short, one-movement works.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="Ritornello" category="Music Theory">
+    <description></description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="calando" category="Tempo">
+    <description>With a gradual decrease in volume and often tempo.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="call and response" category="Music Theory">
+    <description>Call and response is a succession of two distinct phrases usually played by different musicians, where the second phrase is heard as a direct commentary on or response to the first.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="chromatic" category="Music Theory">
+    <description>Based on an octave of 12 semitones, as opposed to a seven-note DIATONIC scale. A chromatic scale consists of an ascending or descending line of semitones. An instrument is said to be chromatic if it can produce all the notes of the chromatic scale.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="chromatic scale" category="Music Theory">
+    <description>A musical scale with twelve pitches, each a semitone or half step apart. A chromatic scale is a nondiatonic scale consisting entirely of half-step intervals having no tonic due to the symmetry of its equally spaced tones</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="con sorda" category="Style">
+    <description>Con sorda is Italian for "with mute". It is used in some older or foreign music to indicate for the trumpeter to insert a mute.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="dissonant" category="Music Theory">
+    <description>In western music, dissonance is the quality of sounds which seems "unstable", and has an aural "need" to "resolve" to a "stable" consonance. Both consonance and dissonance are words applied to harmony, chords, and intervals and by extension to melody.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="double stop" category="Style">
+    <description>The playing of two notes simultaneously on a bowed string instrument, by stopping two strings.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="fanfare" category="Music Theory">
+    <description>A flourish of trumpets or other brass instruments, often with percussion, for ceremonial purposes. Fanfares are distinct from military signals in usage and character. Their tradition goes back to the Middle Ages.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="fermata" category="Music Theory">
+    <description>A fermata (or hold or pause or colloquially a birdseye or before the 20th century a corona) is an element of musical notation indicating that the note should be sustained for longer than its note value would indicate. </description>
+    <history>This symbol appears as early as the 14th century, and is quite common in the works of Dufay and Josquin.</history>
+    <image></image>
+  </item>
+  <item name="fifth" category="Music Theory">
+    <description>A tone five degrees above or below a given tone in a diatonic scale.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="first violins" category="Instruments">
+    <description>The first violins generally take the higher part playing much of the time in the top registers of the instrument and having quite often the "tune"</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="fugue" category="Music Theory">
+    <description>An imitative polyphonic composition in which a theme or themes are stated successively in all of the voices of the contrapuntal structure.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="gavotte" category="Music Theory">
+    <description>The gavotte (also gavot or gavote) originated as a French folk dance. It is a moderate tempo, and notated in 4/4 or 2/2 time with phrases that begin in the middle of the bar.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="giocoso" category="Tempo">
+    <description>Jocular, and playful.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="half step" category="Music Theory">
+    <description>A semitone, also called a half step or a half tone, is the smallest musical interval commonly used in Western tonal music, and it is considered the most dissonant.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="harmony" category="Music Theory">
+    <description>In music, harmony is the use of simultaneous pitches, or chords, that support the main melody.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="harpsichord" category="Instruments">
+    <description>Keyboard instrument in which the strings are set in vibration by a plucking mechanism. The latter consists of plectra made of quill (or sometimes leather) mounted on vertical wooden jacks that are activated by the keys.</description>
+    <history>Primitive harpsichords existed by the mid-15th century. In the 17th and 18th centuries the harpsichord became a very important solo, accompanimental, and ensemble instrument. </history>
+    <image></image>
+  </item>
+  <item name="measure" category="Music Theory">
+    <description>Written groupings of a specified number of musical beats in a piece.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="modulate" category="Music Theory">
+    <description>Modulation is the act or process of changing from one key to another for a breif time.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="morendo" category="Tempo">
+    <description>Dying; a gradual decrescendo at the end of a strain or cadence.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="motif" category="Music Theory">
+    <description></description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="non troppo" category="Tempo">
+    <description>To play "fast, but not overly so".</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="oboe" category="Instruments">
+    <description>A slender woodwind instrument with a conical bore and a double-reed mouthpiece, having a range of three octaves and a penetrating, poignant sound.</description>
+    <history>The oboe developed out of the more powerful shawm in the early 17th century. Intended (unlike the shawm) for indoor use with stringed instruments, its tone was softer and less brilliant. </history>
+    <image></image>
+  </item>
+  <item name="octave" category="Music Theory">
+    <description>An interval eight diatonic scale degrees above it. Two notes an octave apart have the same letter name, and form the most consonant interval possible.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="poco" category="Tempo">
+    <description>To a slight degree or amount; somewhat.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="register" category="Music Theory">
+    <description>A part of the range or compass of an instrument, singing voice or composition.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="ritardando" category="Tempo">
+    <description>Gradually slowing in tempo; retarding. Used chiefly as a direction.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="second violins" category="Instruments">
+    <description>The second violins have the "lower" part, and often play an echoing role with the 1sts, sometimes however they will join and play in unison.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="senza sorda" category="Style">
+    <description>Musical notation to mute while playing, typically for stringed instruments.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="Sonata Form" category="Music Theory">
+    <description>A classical form composed of three main sections: exposition, development, and recapitulation.  Typically two themes are presented in the exposition, transformed throughout the development section, and return in the recapitulation.  Don Juan is in sonata form, although there are many additional themes beyond the standard two.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="sul tasto" category="Style">
+    <description>"On the fingerboard": instruction in string playing to bow near or over the fingerboard, resulting in a bland, flute-like tone.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="thematic material" category="Music Theory">
+    <description>The themes, subjects, motifs, rhythmic figures, from which a composition is constructed.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="trill" category="Style">
+    <description>A more or less rapid alternation of two adjacent notes.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="triplet" category="Music Theory">
+    <description>A group of three notes to be performed in the time of two of the same kind or in the time of any number of another kind.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="trumpet" category="Instruments">
+    <description>The trumpet is the musical instrument in the brass family. They are constructed of brass tubing, and are played by blowing air through closed lips, producing a "buzzing" sound.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="flute" category="Instruments">
+    <description>The flute is a musical instrument of the woodwind family. Unlike woodwind instruments with reeds, a flute is an aerophone or reedless wind instrument that produces its sound from the flow of air across an opening.</description>
+    <history>Flutes are the earliest known musical instruments. A number of flutes dating to about 40,000 to 35,000 years ago have been found in the Swabian Alb region of Germany. These flutes demonstrate that a developed musical tradition existed from the earliest period of modern human presence in Europe.</history>
+    <image></image>
+  </item>
+  <item name="Exposition" category="Music Theory">
+    <description>In sonata form, the opening section which introduces the themes or thematic material.  </description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="Primary Theme" category="Music Theory">
+    <description>The first theme or group of themes in the exposition, usually in the tonic or home key.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="Secondary Theme" category="Music Theory">
+    <description>The second theme or group of the themes in the exposition, usually in the dominant key (the key based on the 5th step of the scale of the home key).</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="Development" category="Music Theory">
+    <description>The middle section of a sonata form, in which the thematic material of the exposition is broken down into smaller parts and subjected to a variety of compositional processes and techniques.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="Recapitulation" category="Music Theory">
+    <description>The third section of a sonata form, in which the themes of the exposition return, but usually without the modulation (change of key) that typically occurs in the exposition.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="Pedal Point" category="Music Theory">
+    <description>A sustained note, usually in the bass, above which shifting harmonies are superimposed.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="Theme and Variations" category="Music Theory">
+    <description>A musical form in which an initial theme is stated and then repeated multiple times in varied or alternate versions.  Don Quixote is a very long and complex theme and variations form in which there are two main themes (Don Quixote's and Sancho Panza's), plus a number of subordinate themes (particularly Dulcinea's theme).  The variations are executed quite freely, each variation illustrating a different chapter from Cervantes' novel</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="Motive" category="Music Theory">
+    <description>A short musical idea.  Each theme in Don Quixote is made up of several distinct motives, each of which is developed and varied independently throughout the piece.&#xD;
+</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="Tremolo" category="Music Theory">
+    <description>An extremely rapid repetition of a single note</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="Glissando" category="Music Theory">
+    <description>An extremely quick upward or downward run of notes</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="Fluttertonguing" category="Music Theory">
+    <description>A technique used for wind and brass instruments in which a tremolo effect is generated through a very rapid use of the tongue.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="Wind Machine" category="Instruments">
+    <description>A percussion instrument consisting of a canvas sheet laid over a cylinder of wooden rods that is in turn attached to a crank that can be turned by a performer, creating a whirring sound reminiscent of wind</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="Cadenza" category="Music Theory">
+    <description>A typically unaccompanied passage for a soloist in a 'free' rhythmic style designed to showcase a virtuosic display.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="Pizzicato" category="Music Theory">
+    <description>The technique of plucking string instruments</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="Menuetto" category="Music Theory">
+    <description>A courtly dance in 3/4 time. Menuetto (or Minuet) movements typically take the form Minuet-Trio-Minuet. In Mozart's 5th Violin COncerto, the trio is replaced by the 'Turkish' allegro. The Menuetto itself is in a rondo form.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="Rondo" category="Music Theory">
+    <description>A form in which one primary section returns again and again with other different sections in between, typically A-B-A-C-A.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="Turkish" category="Music Theory">
+    <description>This section of the concerto is often referred to as "Turkish," although the tunes are actually thought to be derived from Hungarian folk melodies. This section is also in a sort of a Rondo form, with a returning tutti refrain.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="contrabassoon" category="Instruments">
+    <description>The contrabassoon, also known as the double bassoon or double-bassoon is a larger version of the bassoon sounding an octave lower. Its technique is similar to its smaller cousin, with a few notable differences.</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="solo" category="Music Theory">
+    <description>A section of a piece of music in which a single performer is featured</description>
+    <history></history>
+    <image></image>
+  </item>
+  <item name="tutti" category="Music Theory">
+    <description>This is a section within a piece when the entire orchestra is playing the melody.</description>
+    <history></history>
+    <image></image>
+  </item>
+</glossary>

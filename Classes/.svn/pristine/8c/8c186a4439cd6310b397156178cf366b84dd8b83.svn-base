@@ -1,0 +1,1778 @@
+// a
+//  MainViewController.m
+//  Test1
+//
+//  Created by Administrator on 11/16/09.
+//  Copyright 2009 Drexel University. All rights reserved.
+//
+
+
+// Main page after connect:
+// short description of each track
+// 
+
+#import "MainViewController.h"
+#import "Test1AppDelegate.h"
+
+#define USE_CUSTOM_DRAWING 1
+
+@implementation MainViewController
+
+@synthesize myTimer,currentMeasureNumber,mySocket, trackButtonArray, arrayOfTracks, tableView,playControl;
+@synthesize thePieces, currentMusicPiece, currentDataPage, currentProperty, currentTrack, trackTabBar;
+
+NSString * MEASURE_DATA = @"___MEASURE_DATA___";
+NSString * CONTENT_DATA = @"___CONTENT_DATA___";
+
+NSString * REQUEST_CONTENT = @"___REQUEST_CONTENT___";
+NSString * REQUEST_MEASURE = @"___REQUEST_MEASURE___";
+
+NSString * READY_FOR_CONTENT_DATA = @"___CONTENT_DATA_READY___";
+NSString * READY_FOR_MEASURE_DATA = @"___MEASURE_DATA_READY___";
+
+NSString * END_CONTENT_STRING = @"___END_CONTENT___";
+NSString * GOT_CONTENT_SIZE = @"___GOT_CONTENT_SIZE___";
+
+NSString * GOT_ALL_CONTENT = @"___GOT_ALL_CONTENT___";
+
+BOOL updating = FALSE;
+
+NSLock * lock;
+Test1AppDelegate *appDelegate;
+
+int currentIndex = 0;
+const CGFloat kAnimationTime = 0.25;
+
+- (id) initWithTitle:(NSString *) theTitle
+{
+	self = [super init];
+	if (self != nil) {
+		self.tabBarItem.image = [UIImage imageNamed:@"table_gray.png"];
+		appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+		self.title = theTitle;
+		tabBarVisible = YES;
+
+	}
+	return self;
+}
+
+- (void) hideNavBar {
+	[UIView beginAnimations:nil context:NULL];
+    [UIView setAnimationDuration:kAnimationTime];
+	//self.navigationController.navigationBarHidden = tabBarVisible;
+	self.navigationController.navigationBar.alpha =  (tabBarVisible ? 0.0 : 1.0);
+	[UIView commitAnimations];
+
+}
+
+- (void) hidetabbar {
+	[UIView beginAnimations:nil context:NULL];
+    [UIView setAnimationDuration:kAnimationTime];
+
+	if (tabBarVisible) {
+		//self.navigationController.navigationBarHidden = YES;
+		//[self.navigationController.navigationBar setFrame:CGRectMake(0, 0, 480, 30)];
+		self.navigationController.navigationBar.alpha = 0.0;
+		//view.alpha = 0;
+		//[view setFrame:CGRectMake(view.frame.origin.x, 431, view.frame.size.width, view.frame.size.height)];
+	} else {		
+		//[self.navigationController.navigationBar setFrame:CGRectMake(0, -30, 480, 30)];
+		//self.navigationController.navigationBarHidden = NO;
+		//view.alpha = 1.0;
+		self.navigationController.navigationBar.alpha = 1.0;
+		//[view setFrame:CGRectMake(view.frame.origin.x, 480, view.frame.size.width, view.frame.size.height)];
+	}
+	[UIView commitAnimations];
+
+	
+    [UIView beginAnimations:nil context:NULL];
+    [UIView setAnimationDuration:kAnimationTime];
+	[UIView setAnimationDelegate:self];        // sets delegate for this block
+	//[UIView setAnimationDidStopSelector:@selector(hideNavBar)];   // calls the finishedFading method when the animation is done (or done fading out)	
+    
+	for(UIView *view in trackTabBar.view.subviews)
+    {
+        if([view isKindOfClass:[UITabBar class]])
+        {
+            if (tabBarVisible) {
+				//self.navigationController.navigationBarHidden = YES;
+				//[self.navigationController.navigationBar setFrame:CGRectMake(0, 0, 480, 30)];
+				view.alpha = 0;
+                //[view setFrame:CGRectMake(view.frame.origin.x, 431, view.frame.size.width, view.frame.size.height)];
+            } else {		
+				//[self.navigationController.navigationBar setFrame:CGRectMake(0, -30, 480, 30)];
+				//self.navigationController.navigationBarHidden = NO;
+				view.alpha = 1.0;
+                //[view setFrame:CGRectMake(view.frame.origin.x, 480, view.frame.size.width, view.frame.size.height)];
+            }
+        } else {
+            if (tabBarVisible) {
+				//self.navigationController.navigationBarHidden = YES;
+
+                [view setFrame:CGRectMake(view.frame.origin.x, view.frame.origin.y, view.frame.size.width, 320)];
+            } else {
+				//self.navigationController.navigationBarHidden = NO;
+
+                [view setFrame:CGRectMake(view.frame.origin.x, view.frame.origin.y, view.frame.size.width, 320)];
+
+            }
+
+
+        }
+
+    }
+
+	
+
+    [UIView commitAnimations];
+
+	
+
+    tabBarVisible = !tabBarVisible;
+
+}
+
+- (void) fadeTabBar {
+	
+	CGRect appFrame = [[UIScreen mainScreen] applicationFrame];
+
+	CGRect tabBarFrame = [trackTabBar.tabBar frame];
+	
+	//if(!tabBarVisible){
+	[self hideNavBar];
+	
+	if(appDelegate.mode == DEMO_MODE){
+		if(!tabBarVisible){
+			if(appDelegate.USE_SLIDE_FORMAT)
+				[trackTabBar.selectedViewController.view addSubview:playControl.view];
+//			else
+//				[selectedMapController.view addSubview:playControl.view];
+		}
+		else{
+			[playControl.view removeFromSuperview];
+		}
+	}
+//	}
+//	else{
+//		[UIView beginAnimations:nil context:NULL];
+//		[UIView setAnimationDuration:0.5];
+//		//self.navigationController.navigationBarHidden = tabBarVisible;
+//		self.navigationController.navigationBar.alpha = 0.0;
+//		[UIView commitAnimations];   // commits the animation block.  This Block is done.
+		
+		
+		//self.navigationController.navigationBarHidden = tabBarVisible;
+		
+		
+		//self.navigationController.navigationItem.
+		//self.navigationController.navigationBar.frame = CGRectMake(40, 100, 480, 30);
+		//self.navigationController.navigationBar.alpha = 0.0;
+
+	//}
+
+	
+	[UIView beginAnimations:nil context:nil]; // begins animation block
+	[UIView setAnimationDuration:kAnimationTime];        // sets animation duration
+	[UIView setAnimationDelegate:self];        // sets delegate for this block
+	//[UIView setAnimationDidStopSelector:@selector(hideNavBar)];   // calls the finishedFading method when the animation is done (or done fading out)	
+	
+	int yLocation = 0;
+	CGRect r = self.navigationController.navigationBar.frame;
+
+	if (tabBarVisible){
+		//self.navigationController.navigationBar.frame = CGRectMake(r.origin.x, - r.size.height, r.size.width, r.size.height);
+		//self.navigationController.navigationBarHidden = YES;
+		//trackTabBar.view.frame = CGRectMake(0, 20, 480, 600);
+		//trackTabBar.tabBar.hidden = YES;
+		yLocation = trackTabBar.view.frame.size.height;
+		trackTabBar.tabBar.alpha = 0;
+		if(appDelegate.mode == DEMO_MODE)
+			playControl.view.alpha = 0;
+		//yLocation = 200;
+	}
+	else{
+		//self.navigationController.navigationBarHidden = NO;
+		//trackTabBar.tabBar.hidden = NO;
+		//self.navigationController.navigationBar.frame = CGRectMake(r.origin.x, 0, r.size.width, r.size.height);
+		//trackTabBar.view.frame = CGRectMake(0, 0, 480, 600);
+		trackTabBar.tabBar.alpha = 1.0;
+		if(appDelegate.mode == DEMO_MODE)
+			playControl.view.alpha = 1.0;
+		yLocation = trackTabBar.view.frame.size.height - (tabBarFrame.size.height);
+		//yLocation = 300;
+	}
+	trackTabBar.tabBar.frame = CGRectMake(tabBarFrame.origin.x, yLocation, 480, 50);
+	//trackTabBar.view.bounds = CGRectMake(0,0, 480, 400);
+	//trackTabBar.tabBar.backgroundColor = [UIColor clearColor];
+	//trackTabBar.view.backgroundColor = [UIColor clearColor];
+	[UIView commitAnimations];   // commits the animation block.  This Block is done.
+
+	tabBarVisible = !tabBarVisible;
+}
+
+- (void)initializeEverything {    
+	
+	lock = [[NSLock alloc] init];
+	currentMeasureNumber = 0;
+	
+
+	
+	//NSString *html = @"<html><head><title>The Meaning of Life</title></head><body><p>...really is <b>42</b>!</p></body></html>";  
+	//[webView loadHTMLString:html baseURL:[NSURL URLWithString:@"http://www.test.com/message"]];  
+	
+	
+	// Override point for customization after application launch
+	
+//	NSString *text = [NSString stringWithContentsOfURL:[NSURL URLWithString:@"http://music.ece.drexel.edu/~ahrybyk/getCommentary2.php"]];
+//	if(text){
+//		//[textAnnotation setText:text];
+//		[webView loadHTMLString:text baseURL:[NSURL URLWithString:@"http://www.test.com/message"]]; 
+//	}
+	
+	//Network INIT
+	portNum = 5678;
+	connected = FALSE;
+	self.mySocket = [[Socket alloc] init];
+	myTimer = [[NSTimer alloc] init];
+	//myTimer = [NSTimer scheduledTimerWithTimeInterval:2.0 target:self selector:@selector(connectTimer:) userInfo:nil repeats:YES];// init timer to call onTime function once per second
+	cm =0;
+	
+}
+
+BOOL keepTrying = TRUE;
+
+-(void)closeConnection {
+	keepTrying = FALSE;
+	if([self.mySocket isConnected]){
+		[self.mySocket close];
+	}
+}
+
+
+-(void) startConnectThread:(NSNumber *)tries {
+	
+	
+	NSAutoreleasePool *apool=[[NSAutoreleasePool alloc] init];
+	int numTries = [tries intValue];
+	int currentTry = 0;
+	BOOL success = FALSE;
+//	NSString * ip = @"192.168.1.105";
+	NSString * ip = @"10.0.1.180";
+
+	if(numTries > 0){ // if we defined a number of times to try connecting
+		
+		while(currentTry < numTries){
+			currentTry++;
+
+			NSAutoreleasePool *apool=[[NSAutoreleasePool alloc] init];
+		
+			if (!mySocket.connected){
+				// need to reinitialize after a failed connect attempt, or else you get errors
+				// about the file descriptor or some value that's invalid thereafter
+				mySocket = [mySocket init];
+
+				//Connect to IP of broadcasting server
+				if ([mySocket connectToHostName:appDelegate.SERVER_ADDRESS port:portNum] == 0){
+					
+					// if we reconnect and already in MEASURE MODE, then tell the server to start sending measures
+					if(mode == MEASURE){
+						appDelegate.CONNECTED_TO_SERVER = TRUE;
+						[self sendMessage:READY_FOR_MEASURE_DATA];
+					}
+					else{
+						success = TRUE;
+						[self connect];
+					}
+
+					[appDelegate.splashViewController performSelectorOnMainThread : @selector(setConnected:) withObject:[NSNumber numberWithBool:TRUE] waitUntilDone:NO];
+				}
+				else {
+					appDelegate.CONNECTED_TO_SERVER = FALSE;
+					[appDelegate.splashViewController performSelectorOnMainThread : @selector(setConnected:) withObject:[NSNumber numberWithBool:FALSE] waitUntilDone:NO];
+
+				}
+
+			}
+			
+			sleep(2.0);
+			
+			[apool release];
+			
+		}
+	}
+	else{ // If we started the connect thread as an infinite loop, always trying to connect/re-connect
+		
+		while(1){
+			
+			NSAutoreleasePool *apool=[[NSAutoreleasePool alloc] init];
+			
+			//NSString * ipServer = @"10.0.1.180";
+
+			if (!mySocket.connected){
+				// need to reinitialize after a failed connect attempt, or else you get errors
+				// about the file descriptor or some value that's invalid thereafter
+				mySocket = [mySocket init];
+				
+				//Connect to IP of broadcasting server
+				if ([mySocket connectToHostName:appDelegate.SERVER_ADDRESS port:portNum] == 0){
+					
+					// if we reconnect and already in MEASURE MODE, then tell the server to start sending measures
+					if(mode == MEASURE) {
+						appDelegate.CONNECTED_TO_SERVER = TRUE;
+						[self sendMessage:READY_FOR_MEASURE_DATA];
+					}
+					else {
+						[self connect];
+
+					}
+
+					
+					[appDelegate.splashViewController performSelectorOnMainThread : @selector(setConnected:) withObject:[NSNumber numberWithBool:TRUE] waitUntilDone:NO];
+				}
+				else {
+					appDelegate.CONNECTED_TO_SERVER = FALSE;
+					[appDelegate.splashViewController performSelectorOnMainThread : @selector(setConnected:) withObject:[NSNumber numberWithBool:FALSE] waitUntilDone:NO];
+					
+				}
+				
+			}
+			
+			sleep(2.0);
+			
+			[apool release];
+			
+		}
+	}
+		
+	if(!success)
+		[appDelegate.splashViewController performSelectorOnMainThread : @selector(notifyFinished:) withObject:[NSNumber numberWithBool:FALSE] waitUntilDone:NO];
+	
+	[apool release];
+}
+
+
+
+-(void) connect
+{		
+	
+	if([mySocket isConnected])// a connection made?
+	{
+		data = [[[NSMutableData alloc] init] autorelease];//init data
+		
+		
+		[self loadContent];
+				
+	}
+}
+
+
+
+-(void)sendMessage:(NSString *) m {
+	if([mySocket isWritable]){
+		[mySocket writeString:m];
+	}
+}
+
+
+
+
+-(void) loadContent {
+	if([mySocket isWritable]){
+		[mySocket writeString:REQUEST_CONTENT];
+	}
+}
+
+- (void) startTracking{
+	if([mySocket isWritable]){
+		[mySocket writeString:REQUEST_MEASURE];
+	}
+	
+}
+
+-(void) reloadTableRow:(NSNumber * ) row {
+	NSIndexPath * path = [NSIndexPath indexPathForRow:[row intValue] inSection:0];
+	[tableView reloadRowsAtIndexPaths:[NSArray arrayWithObjects:path,nil] withRowAnimation:UITableViewRowAnimationFade];
+	[tableView reloadData];
+}
+
+-(void) tempPush{
+	[self performSelectorOnMainThread:@selector(otherTempPush) withObject:nil waitUntilDone:NO];
+}
+
+-(void) otherTempPush{
+	[self.navigationController pushViewController:trackTabBar animated:YES];
+
+}
+
+- (void) goToLiveTabbar {
+	
+	if(appDelegate.USE_SLIDE_FORMAT){
+
+		NSMutableArray * tracks = [arrayOfTracks objectForKey:appDelegate.CURRENT_PIECE];
+		[self configureTracks:tracks piece:appDelegate.CURRENT_DATA];
+		trackTabBar.title = appDelegate.CURRENT_PIECE;
+	}
+	
+//	[UIView beginAnimations:nil context:nil]; // begins animation block
+//	[UIView setAnimationDuration:kAnimationTime];        // sets animation duration
+//	[UIView setAnimationDelegate:self];        // sets delegate for this block
+//	[UIView setAnimationDidStopSelector:@selector(tempPush)];   // calls the finishedFading method when the animation is done (or done fading out)	
+//	
+//	[self.navigationController performSelectorOnMainThread:@selector(popViewControllerAnimated:) withObject:[NSNumber numberWithBool:NO] waitUntilDone:YES];
+//	
+//	[UIView commitAnimations];
+	//sleep(1.0);
+	
+
+	
+	//[self tableView:tableView didSelectRowAtIndexPath:[NSIndexPath indexPathForRow:[pieceList indexOfObject:appDelegate.CURRENT_PIECE] inSection:0]];
+	
+	//[self.navigationController pushViewController:trackTabBar animated:YES];
+	//[self performSelectorOnMainThread:@selector(tempPush:) withObject:trackTabBar waitUntilDone:YES];
+	//[self.navigationController per
+	[tableView selectRowAtIndexPath:[NSIndexPath indexPathForRow:[pieceList indexOfObject:appDelegate.CURRENT_PIECE] inSection:0] animated:NO scrollPosition:UITableViewScrollPositionMiddle];
+	//[self tableView:tableView didSelectRowAtIndexPath:[NSIndexPath indexPathForRow:[pieceList indexOfObject:appDelegate.CURRENT_PIECE] inSection:0]];
+//
+	
+	if(!tabBarVisible)
+		[self fadeTabBar];
+//	
+//	if(tabBarVisible)
+//		[self hidetabbar];
+}
+
+#pragma mark -
+#pragma mark Main receive thread
+
+BOOL hitEndOfContent = FALSE;
+BOOL gotContentSize = FALSE;
+int totalContentSize = 0;
+int currentContentSize = 0;
+
+-(void)getData:(id) dummy //Thread that constantly listens to the socket to receive new data when it becomes available
+{
+
+	NSAutoreleasePool *apool=[[NSAutoreleasePool alloc] init];
+	//data = [[[NSMutableData alloc] init] autorelease];
+	NSString * contentString = [[NSString alloc] init];
+	while(1)
+	{
+		sleep(.5);
+
+		NSAutoreleasePool *apool=[[NSAutoreleasePool alloc] init];
+		data = [[[NSMutableData alloc] init] autorelease];// init data
+		if([mySocket isConnected])
+		{
+			if([mySocket isReadable])//is there stuff on the socket?
+			{
+
+				
+				int count = [mySocket readData:data];//read data from socket	
+				
+				NSString * response = [[[NSString alloc] initWithData:data encoding:[NSString defaultCStringEncoding]] retain];//string of socket data
+
+				
+				if([response isEqualToString:CONTENT_DATA]){
+					// Set mode to ready to receive content
+					mode = CONTENT;
+					[self sendMessage:READY_FOR_CONTENT_DATA];
+
+					
+				}
+				else if([response isEqualToString:MEASURE_DATA]){
+					// Set mode to ready to receive measures
+					mode = MEASURE;
+					[self sendMessage:READY_FOR_MEASURE_DATA];
+
+				}
+				else if(mode == CONTENT){
+					
+					if(gotContentSize){
+						currentContentSize += count;
+						float percent = (((float)currentContentSize)/totalContentSize);
+						Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+
+						[appDelegate.splashViewController performSelectorOnMainThread : @selector(updateProgress:) withObject:[NSNumber numberWithFloat:percent] waitUntilDone:YES];
+						
+						NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+						NSString *newString = [contentString stringByAppendingString:response];
+						
+						[contentString release]; // we don't need the old string object anymore
+						[newString retain]; // increase retain count, otherwise the pool will release it!
+						contentString = newString; // swap pointers
+						
+						//NSLog(@"%@",contentString);
+						[pool release]; // this line releases the autoreleased objects, and
+						
+					}
+					else{
+						totalContentSize = [response intValue];
+						gotContentSize = TRUE;
+						[self sendMessage:GOT_CONTENT_SIZE];
+					}
+					
+					
+					if(currentContentSize >= totalContentSize){
+						
+						//[self sendMessage:GOT_ALL_CONTENT];
+						
+
+						BOOL ok = [self parseData:[contentString dataUsingEncoding:NSUTF8StringEncoding]];
+						if(!ok){
+							//[currentMeasure performSelectorOnMainThread : @selector(setText:) withObject:[NSString stringWithString:@"Parse Error"] waitUntilDone:YES];
+							
+						}
+						else{
+							[self performSelectorOnMainThread : @selector(createTrackButtons) withObject:nil waitUntilDone:YES];
+							[self startTracking];
+						}
+						Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+
+						[appDelegate.splashViewController performSelectorOnMainThread : @selector(notifyFinished:) withObject:[NSNumber numberWithBool:TRUE] waitUntilDone:NO];
+						appDelegate.CONNECTED_TO_SERVER = TRUE;
+						
+					}
+					
+				}
+				else if(mode == MEASURE){
+					
+					if ([mySocket isConnected]){
+						//currentMeasureNumber = [response integerValue];//int measure number value
+						NSArray *parts = [response componentsSeparatedByString: @";"];	//NSArray array = [[NSArray alloc] ini
+						if([parts count] == 2){
+							 
+							Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+							
+							NSString * piece = [[NSString alloc] initWithString:[parts objectAtIndex:0]];
+							if(piece && ![piece isEqualToString:appDelegate.CURRENT_PIECE]){
+
+								//NSMutableArray * trackStuff = [arrayOfTracks objectForKey:piece];
+								
+								
+								if([pieceList containsObject:piece]){
+									
+									appDelegate.CURRENT_PIECE = piece;
+									for(MusicPiece * p in thePieces){
+										if([p.name isEqualToString:appDelegate.CURRENT_PIECE]){
+											appDelegate.CURRENT_DATA = p;
+											break;
+										}
+									}	
+									
+									// Select
+									[self performSelectorOnMainThread:@selector(reloadTableRow:) withObject:[NSNumber numberWithInt:[pieceList indexOfObject:piece]] waitUntilDone:NO];
+
+								
+									//appDelegate.TOTAL_MEASURES = [((NavigationViewController *)[trackStuff objectAtIndex:0]).trackData numMeasures];
+									//[appDelegate.splashViewController configureTracks:trackStuff];
+									if(appDelegate.LIVE){
+										[self performSelectorOnMainThread:@selector(goToLiveTabbar) withObject:nil waitUntilDone:YES];
+
+
+									}
+								
+
+								}
+								else{
+
+								}
+							}
+							
+							currentMeasureNumber = [[parts objectAtIndex:1] intValue];
+							
+							if(appDelegate.USE_SLIDE_FORMAT){
+								if(appDelegate.CURRENT_MEASURE != currentMeasureNumber){
+									appDelegate.CURRENT_MEASURE = currentMeasureNumber;
+									for(NSString * s in pieceList){
+										NSMutableArray * t = [arrayOfTracks objectForKey:s];
+										for(UIViewController * ui in t){
+											if(ui){
+												@try{
+												[((NavigationViewController *)ui) performSelectorOnMainThread:@selector(checkUpdatePage:) withObject:nil waitUntilDone:YES];
+												}
+												@catch (id theException) {
+													
+												}
+											}
+										}
+									}
+								}
+							}
+							
+							appDelegate.CURRENT_MEASURE = currentMeasureNumber;
+							
+							
+							[piece release];
+
+							
+							
+						}
+						//[currentMeasure performSelectorOnMainThread : @selector(setText:) withObject:[NSString stringWithFormat:@"Rehearsal #: %d", currentMeasureNumber] waitUntilDone:YES];
+
+					}
+
+				}
+				
+				
+				//[self performSelectorOnMainThread : @selector(onTime:) withObject:NULL waitUntilDone:YES];
+				//[currentMeasure setText:[NSString stringWithFormat:@"Measure: %d", currentMeasureNumber]];
+				//NSInteger temp = currentMeasureNumber;
+				//[naviView performSelectorOnMainThread : @selector(goToPage:) withObject:temp waitUntilDone:YES];
+				//[naviView goToPage:currentMeasureNumber];
+				
+				[response release];
+				
+			}
+		}
+		else{
+			//[contentString release];
+		}
+		[apool release];
+	}
+    [apool release];
+	
+}
+
+-(int) getCurrentMeasure {
+	
+	return currentMeasureNumber;
+}
+
+#pragma mark -
+#pragma mark XML parsing methods
+
+- (BOOL)parseData:(NSData *)data1 {
+	
+	BOOL ok = TRUE;
+	
+    NSXMLParser *parser = [[NSXMLParser alloc] initWithData:data1];
+	
+    self.thePieces = [[NSMutableArray alloc] init]; // Create our scheduler list
+	
+    [parser setDelegate:self]; // The parser calls methods in this class
+    [parser setShouldProcessNamespaces:NO]; // We don't care about namespaces
+    [parser setShouldReportNamespacePrefixes:NO]; //
+    [parser setShouldResolveExternalEntities:NO]; // We just want data, no other stuff
+	
+    [parser parse]; // Parse that data..
+	
+	//DataPage * thisPage = [((MusicPiece *)[thePieces objectAtIndex:0]) pageWithMeasure:3];
+	//NSLog(@"%@",[parser parseError]);
+    if ([parser parserError]) {
+        ok = FALSE;
+		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops!" message:@"There was an error parsing the XML file."
+													   delegate:self cancelButtonTitle:@"OK" otherButtonTitles: nil];
+		[alert show];	
+		[alert release];
+    }
+	else{
+		[tableView reloadData];
+		ok = TRUE;
+	}
+	
+    [parser release];
+	
+	return ok;
+}
+
+-(void) createTrackButtons {
+	int numPieces = [thePieces count];
+
+	pieceList = [[NSMutableArray alloc] init];
+
+
+	
+	if (appDelegate.USE_SLIDE_FORMAT){
+		pickerViewArray = [[NSMutableArray alloc] init];
+
+		arrayOfTracks = [[NSMutableDictionary alloc] init];
+		for(int j=0; j<numPieces; j++){
+			
+			MusicPiece * thisPiece = [self.thePieces objectAtIndex:j];
+			Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+
+			//appDelegate.TOTAL_MEASURES = thisPiece.numMeasures;
+			
+			NSMutableArray * trackArray = [[NSMutableArray alloc] init];
+			int numTracks = [thisPiece.tracks count];
+			
+			[pieceList addObject:[NSString stringWithString:thisPiece.name]];
+			
+			for(int i=0; i<numTracks; i++){
+				Track * thisTrack = (Track *)[thisPiece.tracks objectAtIndex:i];
+				thisTrack.pieceName = thisPiece.name;
+				if([thisTrack.name isEqualToString:@"The Music"]){
+				NavigationViewController * navigationViewController = [[NavigationViewController alloc] initWithTrack:thisTrack];
+				navigationViewController.tabBarItem.image = [UIImage imageNamed:@"musicnote.png"];
+				[trackArray addObject:navigationViewController];
+				[navigationViewController release];
+				}
+				
+			}
+			[pickerViewArray addObject:thisPiece.name];
+			[arrayOfTracks setObject:trackArray forKey:thisPiece.name];
+			
+			[trackArray release];
+			
+		}
+	}
+	else{
+		mapArray = [[NSMutableDictionary alloc] init];
+		
+		for(int j=0; j<1; j++){
+			
+			MusicPiece * thisPiece = [self.thePieces objectAtIndex:j];
+			[pieceList addObject:thisPiece.name];
+			
+			MapViewController * mapView = [[MapViewController alloc] init];
+			[mapView setTheDataArray:thisPiece];
+			//[mapView setTracks:5];
+			
+			[mapArray setObject: mapView forKey:thisPiece.name];
+			//[mapView release];
+			
+		}
+		
+	}
+	
+	
+}
+
+
+- (void)parser:(NSXMLParser *)parser didStartElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName attributes:(NSDictionary *)attributeDict {
+    if (qName) {
+        elementName = qName;
+    }
+	
+    if (self.currentDataPage) { // Are we in a
+        // Check for standard nodes
+        if ([elementName isEqualToString:@"measure"] || [elementName isEqualToString:@"text"] || [elementName isEqualToString:@"time"]) {
+            self.currentProperty = [NSMutableString string];
+        } 
+		
+    } 
+	else if (self.currentTrack) { // Are we in a
+        // Check for standard nodes
+        if ([elementName isEqualToString:@"name"]) {
+            self.currentProperty = [NSMutableString string];
+        }
+		else if ([elementName isEqualToString:@"page"]) {
+            self.currentDataPage = [[DataPage alloc] init]; // Create the element
+			self.currentDataPage.parentTrack = self.currentTrack.name;
+			
+			if([attributeDict objectForKey:@"time"]){
+				self.currentDataPage.time = [[attributeDict objectForKey:@"time"] doubleValue];
+			}
+			
+			if([attributeDict objectForKey:@"measure"] ){
+				self.currentDataPage.measure = [[attributeDict objectForKey:@"measure"] intValue];
+			}
+			
+//			if([attributeDict objectForKey:@"structure"] ){
+//				NSString * structure = [attributeDict objectForKey:@"structure"];
+//				if(![self.currentMusicPiece.structureArray containsObject:structure]){
+//					[self.currentMusicPiece.structureArray addObject: structure];
+//				}
+//				self.currentDataPage.structure = structure;
+//			}
+        }
+		
+    } 
+	else if (self.currentMusicPiece) { // Are we in a
+        // Check for standard nodes
+        if ([elementName isEqualToString:@"name"] || [elementName isEqualToString:@"measures"] || [elementName isEqualToString:@"image"] || [elementName isEqualToString:@"audio"]) {
+            self.currentProperty = [NSMutableString string];
+        }
+		else if ([elementName isEqualToString:@"track"]) {
+            self.currentTrack = [[Track alloc] init]; // Create the element
+			
+			if([attributeDict objectForKey:@"name"]){
+				self.currentTrack.name = [attributeDict objectForKey:@"name"];
+			}
+        }
+		
+
+
+    } else { // We are outside of everything, so we need a
+        // Check for deeper nested node
+        if ([elementName isEqualToString:@"piece"]) {
+            self.currentMusicPiece = [[MusicPiece alloc] init];
+			
+			if([attributeDict objectForKey:@"name"]){
+				self.currentMusicPiece.name = [attributeDict objectForKey:@"name"];
+			}
+			
+			if([attributeDict objectForKey:@"measures"] ){
+				self.currentMusicPiece.numMeasures = [[attributeDict objectForKey:@"measures"] intValue];
+			}
+        }
+    }
+}
+
+- (void)parser:(NSXMLParser *)parser foundCharacters:(NSString *)string
+{
+    if (self.currentProperty) {
+        [currentProperty appendString:string];
+    }
+}
+
+- (void)parser:(NSXMLParser *)parser didEndElement:(NSString *)elementName namespaceURI:(NSString *)namespaceURI qualifiedName:(NSString *)qName {
+    if (qName) {
+        elementName = qName;
+    }
+	
+	if (self.currentDataPage) { // Are we in a
+        // Check for standard nodes
+        if ([elementName isEqualToString:@"measure"]) {
+            self.currentDataPage.measure = [self.currentProperty intValue];
+        } else if ([elementName isEqualToString:@"text"]) {
+			[self.currentDataPage extractAndRemoveImageData:&currentProperty];
+			//NSLog(self.currentProperty);
+
+			self.currentDataPage.text = self.currentProperty;
+			//[temp release];
+			//NSLog(currentDataPage.text);
+        } else if ([elementName isEqualToString:@"time"]) {
+            self.currentDataPage.time = [self.currentProperty doubleValue];
+        } else if ([elementName isEqualToString:@"page"]) {
+			if(self.currentDataPage.text && ![self.currentDataPage.text isEqualToString:@""] && ![self.currentDataPage.text isEqualToString:@"NaN"]);
+				[currentTrack addDataPage:self.currentDataPage]; // Add to parent
+            
+			//[self.currentMusicPiece addMeasure:self.currentDataPage];
+			
+			self.currentDataPage = nil; // Set nil
+        }
+    }
+	else if (self.currentTrack) { // Are we in a
+        // Check for standard nodes
+        if ([elementName isEqualToString:@"name"]) {
+            self.currentTrack.name = self.currentProperty;
+        } else if ([elementName isEqualToString:@"track"]) {
+			self.currentTrack.numMeasures = [self.currentMusicPiece numMeasures];
+            [currentMusicPiece addTrack:self.currentTrack]; // Add to parent
+            self.currentTrack = nil; // Set nil
+        }
+    } 
+    else if (self.currentMusicPiece) { // Are we in a
+        // Check for standard nodes
+        if ([elementName isEqualToString:@"name"]) {
+            self.currentMusicPiece.name = self.currentProperty;
+        } else if ([elementName isEqualToString:@"measures"]) {
+            self.currentMusicPiece.numMeasures = [self.currentProperty intValue];
+		} else if ([elementName isEqualToString:@"image"]) {
+			self.currentMusicPiece.image = [UIImage imageNamed:self.currentProperty];
+		} else if ([elementName isEqualToString:@"audio"]) {
+			self.currentMusicPiece.audio = self.currentProperty;
+		}
+		else if ([elementName isEqualToString:@"piece"]) {
+			[self.thePieces addObject:currentMusicPiece];
+            self.currentMusicPiece = nil; // Set nil
+        }
+    }  
+	
+    // We reset the currentProperty, for the next textnodes..
+    self.currentProperty = nil;
+}
+
+- (void)parser :(NSXMLParser *)parser parseErrorOccurred :(NSError *)parseError {
+	NSString *errorString = [NSString stringWithFormat:@"Error %i, Description: %@, Line: %i, Column: %i", [parseError code], [[parser parserError] localizedDescription], [parser lineNumber],	[parser columnNumber]];
+	
+	NSLog(@"error parsing XML: %@", errorString);
+	
+
+}
+
+#pragma mark -
+#pragma mark UIPickerViewDataSource
+
+- (void)pickerView:(UIPickerView *)pickerView didSelectRow:(NSInteger)row inComponent:(NSInteger)component
+{
+ 	NSString * piece = [pickerViewArray objectAtIndex:row];
+	if(piece){
+		NSMutableArray * trackStuff = [arrayOfTracks objectForKey:piece];
+		
+		Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+		appDelegate.TOTAL_MEASURES = [[thePieces objectAtIndex:row] numMeasures];
+		appDelegate.CURRENT_TRACK = [((NavigationViewController *)[trackStuff objectAtIndex:0]).trackData name];
+		[appDelegate.splashViewController configureTracks:trackStuff];
+
+
+
+	}
+
+}
+
+- (NSString *)pickerView:(UIPickerView *)pickerView titleForRow:(NSInteger)row forComponent:(NSInteger)component
+{
+	NSString *returnStr = @"";
+	returnStr = [pickerViewArray objectAtIndex:row];
+	
+	return returnStr;
+}
+
+- (CGFloat)pickerView:(UIPickerView *)pickerView widthForComponent:(NSInteger)component
+{
+	CGFloat componentWidth = 0.0;
+	componentWidth = 340.0;	// first column size is wider to hold names
+
+	return componentWidth;
+}
+
+- (CGFloat)pickerView:(UIPickerView *)pickerView rowHeightForComponent:(NSInteger)component
+{
+	return 40.0;
+}
+
+- (NSInteger)pickerView:(UIPickerView *)pickerView numberOfRowsInComponent:(NSInteger)component
+{
+	return [pickerViewArray count];
+}
+
+- (NSInteger)numberOfComponentsInPickerView:(UIPickerView *)pickerView
+{
+	return 1;
+}
+
+-(void)onTime:(NSTimer*)timer //Timer function that gets called on iterations of the timer delay
+{
+	//[lock lock];
+	//This can be used as the main running loop for the app.
+	//Threads don't allow UI interation making it impossible to update the screen in one
+	//This onTime function gets called on time delayed fireings
+	
+	//updates the current measure
+	
+	
+	if(cm != currentMeasureNumber)
+	{
+		//NSString* test = [NSString stringWithFormat:@"%d", currentMeasureNumber];
+		//[textView setText:test];//updates screen with current measure
+		cm = currentMeasureNumber;
+
+		//[naviView goToPage:currentMeasureNumber];
+		
+	}
+	
+	
+}
+
+
+-(void)updateCurrent//force view update for current measure
+{
+	NSString* test = [NSString stringWithFormat:@"%d", currentMeasureNumber];
+	[textView setText:test];
+}
+
+-(IBAction) current:(id) sender//force update by button push
+{
+	//[textView setText:@"TEST TEXT"];
+	[self updateCurrent];
+}
+
+
+/*
+ // The designated initializer.  Override if you create the controller programmatically and want to perform customization that is not appropriate for viewDidLoad.
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    if (self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil]) {
+        // Custom initialization
+    }
+    return self;
+}
+*/
+
+- (void) beginProgram {
+	
+	printf("Begin Program\n");
+	Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+	
+	if(!appDelegate.CONNECTED_TO_SERVER){
+		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Oops!" message:@"We're having trouble with the data-server. When it's availble, the red light in the upper-right will turn green. Then, click start."
+													   delegate:self cancelButtonTitle:@"OK" otherButtonTitles: nil];
+		[alert show];	
+		[alert release];
+		return;
+	}
+	
+	appDelegate.APPLICATION_STARTED = TRUE;
+
+	NSString * piece = appDelegate.CURRENT_PIECE;
+	NSMutableArray * trackStuff = [arrayOfTracks objectForKey:piece];
+		
+	appDelegate.TOTAL_MEASURES = [((NavigationViewController *)[trackStuff objectAtIndex:0]).trackData numMeasures];
+	[self configureTracks:trackStuff];
+	[[appDelegate.splashViewController pieceBarItem] setTitle:appDelegate.CURRENT_PIECE];
+	[appDelegate.splashViewController pieceBarItem].enabled = TRUE;
+	[appDelegate.splashViewController updateMeasure];
+	
+	if([appDelegate.splashViewController toolbarVisible])
+		[appDelegate.splashViewController hideToolBar];
+	//trackTabBar.view.frame = CGRectMake(0, 0, 480, 400);
+	//[self.navigationController.navigationBar set
+	[self.navigationController pushViewController:trackTabBar animated:YES];
+	//self.navigationController.navigationBarHidden = YES;
+	//[self fadeTabBar];
+	[self fadeTabBar];
+
+	[self.view setNeedsLayout];
+	[self.view setNeedsDisplay];
+	//trackTabBar.tabBar.hidden = YES;
+
+
+}
+
+- (void)alertView:(UIAlertView *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex {
+	// the user clicked one of the OK/Cancel buttons
+	
+}
+
+#pragma mark -
+#pragma mark Initialize GUI
+// Implement loadView to create a view hierarchy programmatically, without using a nib.
+- (void)loadView {
+	
+	CGRect appFrame = [[UIScreen mainScreen] applicationFrame];
+	UIView *view = [[UIView alloc] initWithFrame:appFrame];
+	view.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+	self.view = view;
+	[view release];
+	
+	backGroundImageView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"loadingContent.png"]];
+	backGroundImageView.transform = CGAffineTransformMakeRotation(M_PI / 2.0);
+//	backGroundImageView.frame = CGRectMake(-20, -50, appFrame.size.height + 50, appFrame.size.width + 55);
+	backGroundImageView.frame = CGRectMake(0,0,480,320);
+
+	[self.view addSubview:backGroundImageView];
+	
+//	NSBundle *thisBundle=[NSBundle mainBundle];
+//	
+//	NSString *pathToMyTextFile=[[thisBundle pathForResource:@"introText"
+//													ofType:@"txt"] autorelease];
+//	
+//	NSString *content = [[[NSString alloc]
+//							initWithContentsOfFile:pathToMyTextFile] autorelease]; 
+//	
+//	introTextView = [[UITextView alloc] initWithFrame:CGRectMake(30, 50, appFrame.size.height-40, appFrame.size.width)];
+//	[introTextView setUserInteractionEnabled:FALSE];
+//	[introTextView setFont:[UIFont fontWithName:@"Arial" size:18]];
+//	[introTextView setText:@"Welcome to the DrexelCast Orchestra Companion. This application will guide you through the music, providing automatic updates as various musical events occur throughout the piece. Click the start button to begin."];
+//	[introTextView setBackgroundColor:[UIColor clearColor]];
+//	[introTextView setTextColor:[UIColor whiteColor]];
+	//[self.view addSubview:introTextView];
+
+	
+//	currentMeasure = [[[UILabel alloc] initWithFrame:CGRectMake(10, 20, 250, 75)] autorelease];
+//	[currentMeasure setText:@"Rehearsal #: "];
+//	[currentMeasure setFont:[UIFont fontWithName:@"Arial" size:34]];
+//	[currentMeasure setBackgroundColor:[UIColor clearColor]];
+//	[currentMeasure setTextColor:[UIColor whiteColor]];
+//	// Center Align the label's text
+//	[currentMeasure setTextAlignment:UITextAlignmentCenter];
+	//[self.view addSubview:currentMeasure];
+	
+
+
+	
+//	UIButton * startButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 0, 150, 80)];
+//	startButton.center = CGPointMake(appFrame.size.height/2, appFrame.size.width*4.0/5.0);
+//	startButton.contentVerticalAlignment = UIControlContentVerticalAlignmentCenter;
+//	startButton.contentHorizontalAlignment = UIControlContentHorizontalAlignmentCenter;
+//	
+//	[startButton setTitle:@"Start!" forState:UIControlStateNormal];	
+//
+//	[startButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+//
+//	UIImage *newImage = [[UIImage imageNamed:@"whiteButton.png"] stretchableImageWithLeftCapWidth:12.0 topCapHeight:0.0];
+//	[startButton setBackgroundImage:newImage forState:UIControlStateNormal];
+//	
+//	UIImage *newPressedImage = [[UIImage imageNamed:@"blueButton.png"] stretchableImageWithLeftCapWidth:12.0 topCapHeight:0.0];
+//	[startButton setBackgroundImage:newPressedImage forState:UIControlStateHighlighted];
+//	
+//	[startButton addTarget:self action:@selector(beginProgram) forControlEvents:UIControlEventTouchUpInside];
+//	
+//	startButton.backgroundColor = [UIColor clearColor];
+//	//[self.view addSubview:startButton];
+//	[startButton release];
+	
+	
+	
+//	UILabel * menuLabel = [[[UILabel alloc] initWithFrame:CGRectMake(appFrame.size.width/2 + 20, appFrame.size.height/7, 200, 50)] autorelease];
+//	[menuLabel setText:@"Main Menu"];
+//	menuLabel.center = CGPointMake(appFrame.size.width/2,appFrame.size.height/8);
+//	[menuLabel setFont:[UIFont fontWithName:@"Zapfino" size:24]];
+//	[menuLabel setBackgroundColor:[UIColor clearColor]];
+	//[[self view] addSubview:menuLabel];
+	//[menuLabel release];
+	
+//	textField = [[UITextField alloc] initWithFrame:CGRectMake(-100, appFrame.size.height - 40, 300, 50)];
+//	textField.delegate = self;
+//	textField.placeholder = @"<Enter IP>";
+//	textField.text = @"10.0.1.148";
+//	textField.textAlignment = UITextAlignmentCenter;
+//	textField.font = [UIFont systemFontOfSize:12];
+//	[self.view addSubview: textField];
+	//[textField release];
+	
+	trackButtonArray = [[NSMutableArray alloc] init];
+	flipped = FALSE;
+	
+	[NSThread detachNewThreadSelector:@selector(getData:) toTarget:self withObject:nil];//Start socket polling thread
+
+	
+
+	
+//	piecePicker = [[UIPickerView alloc] initWithFrame:CGRectZero];
+//	
+//	int insetTop = 70;
+//	int insetRight = 20;
+//	
+//	CGSize size = CGSizeMake(200, 200);
+//	CGRect screenRect = [[UIScreen mainScreen] applicationFrame];
+//	CGRect pickerRect = CGRectMake(screenRect.size.height - size.width - insetRight,
+//								   insetTop,
+//								   size.width,
+//								   size.height);
+//	piecePicker.frame = pickerRect;
+//	
+//	//[piecePicker setContentStretch:CGRectMake(0, 150, 200, 200)];
+//	//piecePicker.autoresizingMask = UIViewAutoresizingFlexibleWidth;
+//	piecePicker.backgroundColor = [UIColor clearColor];
+//	piecePicker.showsSelectionIndicator = YES;	// note this is default to NO
+//	// this view controller is the data source and delegate
+//	piecePicker.delegate = self;
+//	piecePicker.dataSource = self;
+	
+
+	//trackTabBar.viewControllers = [NSArray arrayWithObjects:mainViewController,nil];
+//	notesViewController = [[NotesViewController alloc] init];
+//	notesViewController.tabBarItem.image = [UIImage imageNamed:@"chat.png"];
+
+	//[currentViewControllers addObject:notesViewController];
+	
+	trackTabBar = [[UITabBarController alloc] init];
+	trackTabBar.view.frame = CGRectMake(0, 0, 480, 320);
+	trackTabBar.view.clipsToBounds = YES;
+	//trackTabBar.view.autoresizesSubviews = NO;
+	//[trackTabBar shouldAutorotateToInterfaceOrientation:UIInterfaceOrientationLandscapeLeft];
+	trackTabBar.view.autoresizingMask = UIViewAutoresizingFlexibleHeight|UIViewAutoresizingFlexibleWidth;
+	trackTabBar.delegate = self;
+	//CGRect tabBarFrame = [trackTabBar frame];
+	CGRect tabControllerFrame = [trackTabBar.view frame];
+	
+	//trackTabBar.view.frame = CGRectMake(0, -30, 480, 600);
+	//trackTabBar.tabBar.frame = CGRectMake(0, 600, 480, 50);
+	//trackTabBar.view.frame = appFrame;
+	//trackTabBar.frame = CGRectMake(0, 200, tabBarFrame.size.width, tabBarFrame.size.height);
+	//trackTabBar.backgroundColor = [UIColor clearColor];
+	//[appDelegate.splashViewController.view addSubview:trackTabBar];
+	CGFloat sideInset = 25;
+	CGFloat bottomInset = 30;
+
+	tableView = [[UITableView alloc] initWithFrame:CGRectMake(0, 
+															  0, 
+															  appFrame.size.height, 
+															  appFrame.size.width - 30 - bottomInset)];
+	tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+	tableView.rowHeight = 100;
+	tableView.delegate = self;
+	tableView.dataSource = self;
+	tableView.backgroundColor = [UIColor clearColor];
+	[self.view addSubview:tableView];
+	
+	
+	//CGRect navRect = self.navigationController.navigationBar.frame;
+	//self.navigationController.toolbar.frame = CGRectMake(0,0, navRect.size.width, 20);
+	self.view.backgroundColor = [UIColor blackColor];
+	[self initializeEverything];
+			
+	playControl = [[PlaybackControlViewController alloc] init];
+	playControl.view.alpha = 0;
+	
+	UIButton * programNotesButton = [[UIButton alloc] initWithFrame:CGRectMake(0, 320 - 30 - bottomInset, 480, bottomInset)];
+	programNotesButton.backgroundColor = [UIColor clearColor];
+	[programNotesButton setBackgroundImage:[UIImage imageNamed:@"topAndBottomRow.png"] forState:UIControlStateNormal];
+	[programNotesButton setBackgroundImage:[UIImage imageNamed:@"topAndBottomRowSelected.png"] forState:UIControlStateSelected];
+
+	[[programNotesButton layer] setCornerRadius:0.01f];
+	[programNotesButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+	[programNotesButton setTitleColor:[UIColor whiteColor] forState:UIControlStateSelected];
+	[programNotesButton setTitle:@"Program Notes" forState:UIControlStateNormal];
+	[programNotesButton addTarget:self action:@selector(pushProgramNotes) forControlEvents:UIControlEventTouchUpInside];
+	[self.view addSubview:programNotesButton];
+	
+	[programNotesButton release];
+	
+	
+	programNotes = [[ProgramNotesViewController alloc] init];
+	programNotes.title = @"Program Notes";
+}
+
+- (void) pushProgramNotes {
+	NSString *pdfPath = [[NSBundle mainBundle] pathForResource:@"June8thNotes" ofType:@"pdf"];
+	NSURL *pdfURL = [NSURL URLWithString:pdfPath];
+	
+	if(programNotes.pdfUrl == nil)
+		programNotes.pdfUrl = pdfURL;
+	
+	[self.navigationController pushViewController:programNotes animated:YES];
+	
+}
+
+#pragma mark -
+#pragma mark TableViewController methods
+
+- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+{
+	return 1;
+}
+
+//
+// tableView:numberOfRowsInSection:
+//
+// Returns the number of rows in a given section.
+//
+- (NSInteger)tableView:(UITableView *)atableView numberOfRowsInSection:(NSInteger)section
+{
+	return [thePieces count];
+}
+
+- (void)tableView:(UITableView *)atableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+	
+	Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+
+	MusicPiece * thisPiece = (MusicPiece *)[atableView cellForRowAtIndexPath:indexPath].tag;
+	
+	if(appDelegate.USE_SLIDE_FORMAT){
+		if(appDelegate.mode == DEMO_MODE){
+			appDelegate.LIVE = YES;
+			NSArray * vc = trackTabBar.viewControllers;
+			for(UIViewController * uivc in vc){
+				[((NavigationViewController *)uivc) stopTimer];
+			}
+		}
+		
+		NSMutableArray * trackStuff = [arrayOfTracks objectForKey:thisPiece.name];
+		[self configureTracks:trackStuff piece:thisPiece];
+
+		trackTabBar.selectedIndex = 0;
+
+		[trackTabBar.navigationItem setRightBarButtonItem:appDelegate.splashViewController.connectedItem];
+
+
+		[self.navigationController pushViewController:trackTabBar animated:YES];
+		//[self.navigationController pushViewController:g animated:YES];
+		//[appDelegate.glossary goToPage:@"oboe"];
+		trackTabBar.title = thisPiece.name;
+
+		if(tabBarVisible)
+			[self hidetabbar];
+		
+
+		
+		if(![appDelegate.CURRENT_PIECE isEqualToString:thisPiece.name] && (appDelegate.mode == DEMO_MODE)){
+			if(thisPiece.audio)
+				[appDelegate setSong:thisPiece.audio];
+			
+			appDelegate.CURRENT_PIECE = thisPiece.name;
+			
+			NSArray * vc = trackTabBar.viewControllers;
+			for(UIViewController * uivc in vc){
+				[((NavigationViewController *)uivc) startTimer];
+			}
+			
+		}
+	}
+	else{
+		
+		if(appDelegate.mode == DEMO_MODE){
+			appDelegate.LIVE = YES;
+
+
+		}
+		
+		if(selectedMapController)
+			[selectedMapController stopTimer];
+		
+		MapViewController * selectedMap = [mapArray objectForKey:thisPiece.name];
+		if(selectedMap){
+			
+			//if(![appDelegate.CURRENT_PIECE isEqualToString:thisPiece.name])
+				[selectedMap startTimer];
+
+			selectedMap.title = thisPiece.name;
+			selectedMapController = selectedMap;
+			[self.navigationController pushViewController: selectedMap animated: YES];
+			
+			if(tabBarVisible)
+				[self hidetabbar];
+		}
+		
+		if(![appDelegate.CURRENT_PIECE isEqualToString:thisPiece.name] && (appDelegate.mode == DEMO_MODE)){
+			if(thisPiece.audio){
+				[appDelegate setSong:thisPiece.audio];
+	
+			}
+			
+			appDelegate.CURRENT_PIECE = thisPiece.name;
+
+			
+		}
+		
+	}
+	
+	
+	
+}
+
+-(void) push:(UIViewController * ) v {
+	//[self.navigationController popViewControllerAnimated:YES];
+	[self.navigationController pushViewController:v animated:YES];
+	
+}
+
+//
+// tableView:cellForRowAtIndexPath:
+//
+// Returns the cell for a given indexPath.
+//
+- (UITableViewCell *)tableView:(UITableView *)aTableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+	MusicPiece * piece = (MusicPiece *)[thePieces objectAtIndex:[indexPath row]];
+	UIImageView * imageView;
+	UIImage *image ;
+
+#if USE_CUSTOM_DRAWING
+	const NSInteger TOP_LABEL_TAG = 1001;
+	const NSInteger BOTTOM_LABEL_TAG = 1002;
+	const NSInteger IMAGE_LABEL_TAG = 1003;
+
+	const CGFloat IMAGE_INSET_TOP = 15;
+	const CGFloat IMAGE_INSET_LEFT = 20;
+	//const CGFloat IMAGE_HEIGHT = 20;
+	UILabel *topLabel;
+	UILabel *bottomLabel;
+#endif
+	
+	static NSString *CellIdentifier = @"Cell";
+	UITableViewCell *cell = [aTableView dequeueReusableCellWithIdentifier:CellIdentifier];
+	if (cell == nil)
+	{
+		//
+		// Create the cell.
+		//
+		cell =
+		[[[UITableViewCell alloc]
+		  initWithFrame:CGRectZero
+		  reuseIdentifier:CellIdentifier]
+		 autorelease];
+		
+#if USE_CUSTOM_DRAWING
+		UIImage *indicatorImage = [UIImage imageNamed:@"indicator.png"];
+		cell.accessoryView =
+		[[[UIImageView alloc]
+		  initWithImage:indicatorImage]
+		 autorelease];
+		
+		const CGFloat LABEL_HEIGHT = 60;
+		
+
+		
+		imageView = [[UIImageView alloc] init];
+		imageView.tag = IMAGE_LABEL_TAG;
+		imageView.frame = CGRectMake(IMAGE_INSET_LEFT, IMAGE_INSET_TOP, aTableView.rowHeight - 2*IMAGE_INSET_TOP, aTableView.rowHeight - 2*IMAGE_INSET_TOP);
+		[cell.contentView addSubview:imageView];
+
+		
+		//
+		// Create the label for the top row of text
+		//
+		topLabel =
+		[[[UILabel alloc]
+		  initWithFrame:
+		  CGRectMake(
+					 imageView.frame.size.width + IMAGE_INSET_LEFT + 2.0 * cell.indentationWidth - 5,
+					 aTableView.rowHeight*0.1,
+					 aTableView.bounds.size.width -
+					 imageView.frame.size.width - 4.0 * cell.indentationWidth
+					 - indicatorImage.size.width,
+					 LABEL_HEIGHT)]
+		 autorelease];
+		[cell.contentView addSubview:topLabel];
+		
+		//
+		// Configure the properties for the text that are the same on every row
+		//
+		topLabel.tag = TOP_LABEL_TAG;
+		topLabel.backgroundColor = [UIColor clearColor];
+		topLabel.textColor = [UIColor colorWithRed:0.0 green:0.0 blue:0.7 alpha:1.0];
+		topLabel.highlightedTextColor = [UIColor colorWithRed:1.0 green:1.0 blue:0.9 alpha:1.0];
+		topLabel.font = [UIFont systemFontOfSize:[UIFont labelFontSize]+3];
+		topLabel.adjustsFontSizeToFitWidth = NO;
+		topLabel.lineBreakMode = UILineBreakModeWordWrap;
+		topLabel.numberOfLines = 2;
+		//
+		// Create the label for the top row of text
+		//
+		bottomLabel =
+		[[[UILabel alloc]
+		  initWithFrame:
+		  CGRectMake(aTableView.bounds.size.width - indicatorImage.size.width - 60,
+					 0.5 * (aTableView.rowHeight - 2*LABEL_HEIGHT) + LABEL_HEIGHT,
+					 aTableView.bounds.size.width - imageView.frame.size.width - 4.0 * cell.indentationWidth - indicatorImage.size.width,
+					 LABEL_HEIGHT)] autorelease];
+		[cell.contentView addSubview:bottomLabel];
+		
+		//
+		// Configure the properties for the text that are the same on every row
+		//
+		bottomLabel.tag = BOTTOM_LABEL_TAG;
+		bottomLabel.backgroundColor = [UIColor clearColor];
+		bottomLabel.textColor = [UIColor colorWithRed:1.0 green:0.0 blue:0.2 alpha:1.0];
+		bottomLabel.highlightedTextColor = [UIColor colorWithRed:1.0 green:1.0 blue:0.9 alpha:1.0];
+		bottomLabel.font = [UIFont systemFontOfSize:[UIFont labelFontSize] - 2];
+
+		
+		//
+		// Create a background image view.
+		//
+		cell.backgroundView =
+		[[[UIImageView alloc] init] autorelease];
+		cell.selectedBackgroundView =
+		[[[UIImageView alloc] init] autorelease];
+#endif
+	}
+	
+#if USE_CUSTOM_DRAWING
+	else
+	{
+		topLabel = (UILabel *)[cell viewWithTag:TOP_LABEL_TAG];
+		bottomLabel = (UILabel *)[cell viewWithTag:BOTTOM_LABEL_TAG];
+		imageView = (UIImageView *)[cell viewWithTag:IMAGE_LABEL_TAG];
+
+		
+	}
+	
+	
+	//topLabel.text = [NSString stringWithFormat:@"Cell at row %ld.", [indexPath row]];
+	//bottomLabel.text = [NSString stringWithFormat:@"Some other information.", [indexPath row]];
+	topLabel.text = piece.name;
+	if([piece.name isEqualToString: appDelegate.CURRENT_PIECE ]){
+		bottomLabel.text = @"LIVE";
+	}
+	else {
+		bottomLabel.text = @"";
+	}
+	
+	if(piece.image){
+		image = piece.image;
+	}
+	else if([piece.name hasPrefix:@"Brahms"]){
+		image = [UIImage imageNamed:@"brahms.jpg"];
+
+	}
+	else if([piece.name hasPrefix:@"Shostakovich"]){
+		image = [UIImage imageNamed:@"shostakovich.jpg"];
+		
+	}
+	else if([piece.name hasPrefix:@"Mozart"]){
+		image = [UIImage imageNamed:@"mozart.gif"];
+		
+	}
+	else if([piece.name isEqualToString:@"Strauss, Don Juan"]){
+		image = [UIImage imageNamed:@"donJuan.jpg"];
+		
+	}
+	else if([piece.name isEqualToString:@"Strauss, Don Quixote"]){
+		image = [UIImage imageNamed:@"donQuixote.png"];
+		
+	}
+	else{
+		image = [UIImage imageNamed:@"notes.png"];
+	}
+	
+	CGSize newSize = CGSizeMake( aTableView.rowHeight - 2*IMAGE_INSET_TOP, aTableView.rowHeight - 2*IMAGE_INSET_TOP);
+	UIGraphicsBeginImageContext( newSize );// a CGSize that has the size you want
+	[image drawInRect:CGRectMake(0,0,newSize.width,newSize.height)];
+	//image is the original UIImage
+	UIImage* newImage = UIGraphicsGetImageFromCurrentImageContext();
+	UIGraphicsEndImageContext();
+	
+	imageView.image = newImage;
+
+	
+	cell.tag = piece;
+	//
+	// Set the background and selected background images for the text.
+	// Since we will round the corners at the top and bottom of sections, we
+	// need to conditionally choose the images based on the row index and the
+	// number of rows in the section.
+	//
+	UIImage *rowBackground;
+	UIImage *selectionBackground;
+	NSInteger sectionRows = [aTableView numberOfRowsInSection:[indexPath section]];
+	NSInteger row = [indexPath row];
+	if (row == 0 && row == sectionRows - 1)
+	{
+		rowBackground = [UIImage imageNamed:@"topAndBottomRow.png"];
+		selectionBackground = [UIImage imageNamed:@"topAndBottomRowSelected.png"];
+	}
+	else if (row == 0)
+	{
+		rowBackground = [UIImage imageNamed:@"topRow.png"];
+		selectionBackground = [UIImage imageNamed:@"topRowSelected.png"];
+	}
+	else if (row == sectionRows - 1)
+	{
+		rowBackground = [UIImage imageNamed:@"bottomRow.png"];
+		selectionBackground = [UIImage imageNamed:@"bottomRowSelected.png"];
+	}
+	else
+	{
+		rowBackground = [UIImage imageNamed:@"middleRow.png"];
+		selectionBackground = [UIImage imageNamed:@"middleRowSelected.png"];
+	}
+	((UIImageView *)cell.backgroundView).image = rowBackground;
+	((UIImageView *)cell.selectedBackgroundView).image = selectionBackground;
+	
+	//
+	// Here I set an image based on the row. This is just to have something
+	// colorful to show on each row.
+	//
+	//[cell setImage:image];
+	//cell.image = image;
+	//[imageView release];
+	//[cell setImageInsets:UIEdgeInsetsMake(IMAGE_INSET_LEFT, IMAGE_INSET_LEFT, IMAGE_INSET_TOP, IMAGE_INSET_TOP)];
+
+//	if(piece.image){
+//		cell.image = piece.image;
+//	}
+//	else{
+//		cell.image = [UIImage imageNamed:@"note.png"];
+//	}
+//	if ((row % 3) == 0)
+//	{
+//		cell.image = [UIImage imageNamed:@"imageA.png"];
+//		//[cell setImage:[UIImage imageNamed:@"imageA.png"] forState:UIControlStateNormal];
+//	}
+//	else if ((row % 3) == 1)
+//	{
+//		cell.image = [UIImage imageNamed:@"imageB.png"];
+//	}
+//	else
+//	{
+//		cell.image = [UIImage imageNamed:@"imageC.png"];
+//	}
+#else
+	cell.text = [NSString stringWithFormat:@"Cell at row %ld.", [indexPath row]];
+#endif
+	
+	return cell;
+}
+
+#pragma mark -
+#pragma mark TabBar stuff
+-(void)tabBarController:(UITabBarController *)tabBarController didSelectViewController:(UIViewController *)viewController{
+	
+
+
+//	if([viewController isKindOfClass:[NavigationViewController class]]){
+//		Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+//		appDelegate.CURRENT_TRACK = [((NavigationViewController *)viewController).trackData name];
+//	}
+//	
+//	// prepare your transition
+//	CATransition *transition;
+//	transition = [CATransition animation];
+//	transition.type = kCATransitionMoveIn;
+//	transition.duration = 0.1; 
+//	
+	NSArray * vcs = tabBarController.viewControllers;
+	
+	int nextIndex = [vcs indexOfObject:viewController];
+//	
+//	if (currentIndex < nextIndex){
+//		transition.subtype = kCATransitionFromTop;
+//		
+//		// prepare your view switching
+//		[[[viewController view]layer]addAnimation:transition forKey:nil];
+//	}
+//	else if(currentIndex > nextIndex){
+//		transition.subtype = kCATransitionFromBottom;
+//		
+//		// prepare your view switching
+//		[[[viewController view]layer]addAnimation:transition forKey:nil];
+//	}
+	
+	if(tabBarVisible)
+		[self fadeTabBar];
+	
+	if (nextIndex != ([vcs count]-1)){
+
+	}
+	if(currentIndex != ([vcs count]-1)){
+		//		if(toolbarVisible)
+		//			[self hideToolBar];	
+	}
+	
+	//	if(nextIndex == 0 && currentIndex == ([vcs count]-1)){
+	//		[self hideToolBar];	
+	//	}
+	
+	currentIndex = nextIndex;
+	
+	//tabBarController.view.frame = CGRectMake(0, 0, 480, 400);
+	//tabBarController.view.clipsToBounds = YES;
+	//[self updateMeasure];
+	
+	if(INCLUDE_MAP_OPTION){
+	if([viewController isKindOfClass:[MapViewController class]]){
+		[((MapViewController *)viewController) fadeInPath];
+	}
+	}
+	
+}
+
+- (void) configureTracks:(NSMutableArray *) array piece:(MusicPiece *) piece{
+	Test1AppDelegate *appDelegate = (Test1AppDelegate *)[[UIApplication sharedApplication] delegate];
+	
+	//if(appDelegate.APPLICATION_STARTED){
+		
+		if(currentViewControllers){
+			[currentViewControllers removeAllObjects];
+		}
+		else{
+			currentViewControllers = [[NSMutableArray alloc] init];
+		}
+		
+		for(int	i =0; i<[array count]; i++){
+//			if([[array objectAtIndex:i] isKindOfClass:[NavigationViewController class]]){
+//				[((NavigationViewController *)[array objectAtIndex:i]) loadPages];
+//			}
+			[currentViewControllers addObject:[array objectAtIndex:i]];
+		}
+//	if(selectedMapController){
+//		selectedMapController = nil;
+//	}
+	
+	if(INCLUDE_MAP_OPTION){
+	if(!selectedMapController){
+		selectedMapController = [[MapViewController alloc] init];
+		selectedMapController.title = @"Map";
+		selectedMapController.tabBarItem.image = [UIImage imageNamed:@"menu.png"];
+		[selectedMapController stopTimer];
+	}
+	
+	[selectedMapController setTheDataArray:piece];
+	[selectedMapController startTimer];
+	[selectedMapController.view setNeedsDisplay];
+	
+		//[currentViewControllers insertObject:mainViewController atIndex:0];
+		[currentViewControllers insertObject:selectedMapController atIndex:([currentViewControllers count])];
+	}
+		[trackTabBar setViewControllers:currentViewControllers animated:YES];
+		//[trackTabBar.view addSubview:((NavigationViewController *)[currentViewControllers objectAtIndex:0]).view];
+		trackTabBar.selectedIndex = 0;
+		
+		//[piecePicker reloadComponent:0];
+		//[trackTabBar set
+
+		
+		//[self changeTrack:[currentViewControllers objectAtIndex:0]];
+		//[self updateMeasure];
+	//}
+	
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+	[textField resignFirstResponder];
+	return NO;
+}
+
+#pragma mark -
+#pragma mark Touch events
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
+    UITouch *touch = [touches anyObject];
+    startTouchPosition = [touch locationInView:[self view]];
+	
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
+	
+	UITouch *touch = [touches anyObject];
+    CGPoint currentTouchPosition = [touch locationInView:[self view]];
+	
+	// reset the touch posistion
+	startTouchPosition.x = 0.0;
+	startTouchPosition.y = 0.0;
+	
+}
+
+
+
+/*
+// Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
+- (void)viewDidLoad {
+    [super viewDidLoad];
+}
+*/
+
+
+// Override to allow orientations other than the default portrait orientation.
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
+    // Return YES for supported orientations
+    return (interfaceOrientation == UIInterfaceOrientationLandscapeLeft || interfaceOrientation == UIInterfaceOrientationLandscapeRight);
+    //return (interfaceOrientation == UIInterfaceOrientationLandscapeLeft);
+}
+
+
+
+-(void) flip {
+	
+//	if (self.naviView.view.superview == nil){
+//		[self.view insertSubview:naviView.view atIndex:0];
+//	}
+//	naviView.modalTransitionStyle = UIModalTransitionStyleFlipHorizontal;
+//	[self presentModalViewController:naviView animated:YES];
+//	
+//	flipped = YES;
+					
+}
+
+
+
+
+- (void)didReceiveMemoryWarning {
+	// Releases the view if it doesn't have a superview.
+    [super didReceiveMemoryWarning];
+	
+	// Release any cached data, images, etc that aren't in use.
+}
+
+- (void)viewDidUnload {
+	// Release any retained subviews of the main view.
+	// e.g. self.myOutlet = nil;
+}
+
+
+- (void)dealloc {
+	[introTextView release];
+	[flipButton release];
+	[loadContentButton release];
+	[startTrackingButton release];
+	//[NavigationViewController release];
+
+	[currentProperty release];
+	[currentDataPage release];
+	[currentMusicPiece release];
+	[thePieces release];
+
+	//[trackTabBar release];
+
+	[backGroundImageView release];
+	[connectLabel release];
+    [super dealloc];
+}
+
+
+@end
